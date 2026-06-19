@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>千石蔵 HACCP管理システム v5.3</title>
+<style>
+  :root {
+    --primary:      #1a56db;
+    --primary-dark: #1e429f;
+    --success:      #0e9f6e;
+    --warning:      #c27803;
+    --danger:       #e02424;
+    --bg:           #f3f4f6;
+    --card:         #ffffff;
+    --text:         #111827;
+    --muted:        #6b7280;
+    --border:       #e5e7eb;
+    --water:        #0891b2;
+    --health:       #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); }
+
+  /* ─── ヘッダー ─── */
+  header {
+    background: var(--primary-dark);
+    color: #fff;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  header h1  { font-size: 1rem; font-weight: 700; }
+  .ver-badge {
+    background: rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  /* ─── タブバー ─── */
+  .tabs {
+    display: flex;
+    background: var(--primary);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 11px 10px;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.75);
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover  { background: rgba(255,255,255,0.12); color: #fff; }
+  .tab-btn.active { background: var(--card); color: var(--primary); font-weight: 700; border-radius: 6px 6px 0 0; }
+
+  /* ─── タブコンテンツ ─── */
+  .tab-pane          { display: none; padding: 18px; max-width: 960px; margin: 0 auto; }
+  .tab-pane.active   { display: block; }
+
+  /* ─── カード ─── */
+  .card {
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .card h2 { font-size: 1rem;   font-weight: 700; margin-bottom: 10px; }
+  .card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--primary); }
+  .section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 14px 0 6px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+  }
+
+  /* ─── ボタン ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: opacity 0.15s;
+  }
+  .btn:hover       { opacity: 0.85; }
+  .btn-primary     { background: var(--primary); color: #fff; }
+  .btn-success     { background: var(--success); color: #fff; }
+  .btn-danger      { background: var(--danger);  color: #fff; }
+  .btn-outline     { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+  .btn-sm          { padding: 5px 12px; font-size: 0.76rem; }
+
+  /* ─── ステータスバッジ ─── */
+  .badge-ok   { background: #d1fae5; color: #065f46; border-radius: 999px; padding: 2px 10px; font-size: 0.73rem; }
+  .badge-warn { background: #fef3c7; color: #92400e; border-radius: 999px; padding: 2px 10px; font-size: 0.73rem; }
+  .badge-err  { background: #fee2e2; color: #991b1b; border-radius: 999px; padding: 2px 10px; font-size: 0.73rem; }
+
+  /* ─── テーブル ─── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th  { background: var(--bg); font-weight: 600; font-size: 0.77rem; }
+  tr:hover td { background: #f9fafb; }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ─── フォーム ─── */
+  .form-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  input[type="date"],
+  input[type="text"],
+  input[type="url"],
+  textarea {
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    background: var(--card);
+    font-family: inherit;
+  }
+  textarea { width: 100%; resize: vertical; min-height: 80px; }
+
+  /* ─── ローディング ─── */
+  .loading { text-align: center; padding: 28px; color: var(--muted); font-size: 0.88rem; }
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── ログエントリー ─── */
+  .log-entry {
+    font-family: 'Courier New', monospace;
+    font-size: 0.76rem;
+    padding: 5px 9px;
+    border-radius: 4px;
+    margin-bottom: 3px;
+    line-height: 1.5;
+  }
+  .log-INFO  { background: #eff6ff; }
+  .log-WARN  { background: #fffbeb; }
+  .log-ERROR { background: #fef2f2; }
+
+  /* ─── 日々の記録サブセクション ─── */
+  .section-box {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .section-box-header {
+    background: var(--bg);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-box-header strong { font-size: 0.88rem; }
+  .section-box-body { padding: 12px 14px; }
+
+  /* ─── 体調管理グリッド ─── */
+  .health-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .health-card {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    border-left: 3px solid var(--health);
+  }
+  .health-card.ok   { border-left-color: var(--success); }
+  .health-card.warn { border-left-color: var(--danger); }
+  .health-card .name { font-weight: 700; margin-bottom: 4px; }
+  .health-card .detail { color: var(--muted); font-size: 0.76rem; }
+
+  /* ─── モーダル ─── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card); border-radius: 12px;
+    padding: 24px; max-width: 560px; width: 92%;
+    max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .modal-box h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%; padding: 7px 11px;
+    border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.82rem; font-family: inherit;
+  }
+  .form-group select { background: var(--card); }
+  .modal-footer { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+
+  /* ─── 設定タブ ─── */
+  .settings-group { margin-bottom: 18px; }
+  .settings-group label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; }
+  .url-current {
+    font-family: 'Courier New', monospace;
+    font-size: 0.76rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 11px;
+    word-break: break-all;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .config-db-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .config-db-row:last-child { border-bottom: none; }
+  .config-db-label { flex: 1; font-weight: 600; }
+  .config-db-id    { color: var(--muted); font-size: 0.75rem; font-family: monospace; }
+
+  /* ─── レスポンシブ ─── */
+  @media (max-width: 600px) {
+    .tab-btn    { font-size: 0.68rem; padding: 10px 6px; }
+    .tab-pane   { padding: 12px; }
+    .form-row   { flex-direction: column; align-items: stretch; }
+    table       { font-size: 0.76rem; }
+    .health-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ ヘッダー ══════════════════ -->
+<header>
+  <div style="flex:1">
+    <h1>🍺 千石蔵ビアホール　HACCP管理システム</h1>
+  </div>
+  <span class="ver-badge">v5.3</span>
+</header>
+
+<!-- ══════════════════ タブバー ══════════════════ -->
+<div class="tabs">
+  <button id="tabbtn-dashboard" class="tab-btn active" onclick="switchTab('dashboard',this)">📊 ダッシュボード</button>
+  <button id="tabbtn-documents" class="tab-btn"        onclick="switchTab('documents',this)">📚 書類</button>
+  <button id="tabbtn-daily"     class="tab-btn"        onclick="switchTab('daily',this)"    >📋 日々の記録</button>
+  <button id="tabbtn-water"     class="tab-btn"        onclick="switchTab('water',this)"    >💧 水質検査</button>
+  <button id="tabbtn-cip"       class="tab-btn"        onclick="switchTab('cip',this)"      >🧼 ATP/CIP</button>
+  <button id="tabbtn-search"    class="tab-btn"        onclick="switchTab('search',this)"   >🔍 検索</button>
+  <button id="tabbtn-haccp"     class="tab-btn"        onclick="switchTab('haccp',this)"    >🎯 HACCP管理項目</button>
+  <button id="tabbtn-links"     class="tab-btn"        onclick="switchTab('links',this)"    >🔗 リンク集</button>
+  <button id="tabbtn-settings"  class="tab-btn"        onclick="switchTab('settings',this)" >⚙️ 設定</button>
+  <button id="tabbtn-debug"     class="tab-btn"        onclick="switchTab('debug',this)"    >🐛 デバッグ</button>
+</div>
+
+<!-- ══════════════════ Tab 1: ダッシュボード ══════════════════ -->
+<div id="tab-dashboard" class="tab-pane active">
+
+  <div class="card">
+    <h2>🔗 システム接続状態</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">Notion 接続・各 DB のアクセス権を診断します。</p>
+    <button class="btn btn-primary" onclick="runConnectionCheck('connection-result')">接続確認を実行</button>
+    <div id="connection-result" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card">
+    <h2>📅 本日の記録サマリー</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      本日（<span id="today-label"></span>）の各 DB 記録件数を集計します。
+    </p>
+    <button class="btn btn-outline" onclick="loadTodaySummary()">📥 本日の記録を読み込む</button>
+    <div id="today-summary" style="margin-top:14px"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 2: 書類 ══════════════════ -->
+<div id="tab-documents" class="tab-pane">
+
+  <div class="card">
+    <h2>📚 HACCP必須書類マスター（Notion）</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      書類マスター DB（ステータス: Active）を自動読み込みします。
+    </p>
+    <button class="btn btn-primary" onclick="loadDocuments()">🔄 書類を読み込む</button>
+    <div id="doc-result" style="margin-top:14px">
+      <p style="color:var(--muted)">「書類を読み込む」を押してください。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📁 静的書類保管庫（スプレッドシート）</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      HACCP書類16点の本体（組織図・危害要因分析表・CCP決定表など）はスプレッドシートの各シートタブに格納されています。
+      文書番号で Notion 側書類マスターと相互参照できます。
+    </p>
+    <button class="btn btn-primary" onclick="loadDocumentMaster()">🔄 書類本体一覧を読み込む</button>
+    <div id="doc-master-result" style="margin-top:14px">
+      <p style="color:var(--muted)">「書類本体一覧を読み込む」を押してください。</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 3: 日々の記録 ══════════════════ -->
+<div id="tab-daily" class="tab-pane">
+
+  <div class="card">
+    <h2>📋 日々の記録</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      体調管理・開店前チェック・締め作業の記録を日付で確認します。
+    </p>
+    <div class="form-row">
+      <input type="date" id="daily-date" />
+      <button class="btn btn-primary" onclick="loadDailyRecords()">📋 記録を読み込む</button>
+    </div>
+    <div id="daily-result"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 4: 水質検査 ══════════════════ -->
+<div id="tab-water" class="tab-pane">
+
+  <div class="card">
+    <h2>💧 水質検査記録</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      水質検査DB（実施日 Test date フィールド）から記録を取得します。日付を空欄にすると最新100件を表示します。
+    </p>
+    <div class="form-row">
+      <input type="date" id="water-date" />
+      <button class="btn btn-primary" onclick="loadWaterQuality()">💧 検索</button>
+      <button class="btn btn-outline btn-sm" onclick="loadWaterQuality(true)">最新100件</button>
+    </div>
+    <div id="water-result"><p style="color:var(--muted)">日付を選択するか「最新100件」を押してください。</p></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 5: ATP/CIP ══════════════════ -->
+<div id="tab-cip" class="tab-pane">
+
+  <div class="card">
+    <h2>🧼 CIP・ATP 洗浄管理記録</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      CIP・ATP 洗浄管理 DB から記録を取得します。日付を空欄にすると最新100件を表示します。
+    </p>
+    <div class="form-row">
+      <input type="date" id="cip-date" />
+      <button class="btn btn-primary" onclick="loadCIPATP()">🧼 検索</button>
+      <button class="btn btn-outline btn-sm" onclick="loadCIPATP(true)">最新100件</button>
+    </div>
+    <div id="cip-result"><p style="color:var(--muted)">日付を選択するか「最新100件」を押してください。</p></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 6: 検索 ══════════════════ -->
+<div id="tab-search" class="tab-pane">
+
+  <div class="card">
+    <h2>🔍 日付横断検索</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      登録された全 DB を指定日付で横断検索し、タイムライン形式で表示します。
+    </p>
+    <div class="form-row">
+      <input type="date" id="search-date" />
+      <button class="btn btn-primary" onclick="runSearch()">🔍 検索</button>
+    </div>
+    <div id="search-result"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 7: HACCP管理項目 ══════════════════ -->
+<div id="tab-haccp" class="tab-pane">
+
+  <div class="card">
+    <h2>🎯 HACCP管理項目マスター</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      12項目のHACCP管理要求事項を管理します。大分類・説明・担当DB・優先度などを編集できます。
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="loadHACCPItems()">🔄 一覧を読み込む</button>
+      <button class="btn btn-success btn-sm" onclick="openHACCPModal(null)">➕ 新規項目を追加</button>
+    </div>
+    <div id="haccp-result">
+      <p style="color:var(--muted)">「一覧を読み込む」を押してください。</p>
+    </div>
+  </div>
+
+  <!-- HACCP 編集モーダル -->
+  <div id="haccp-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 id="haccp-modal-title">HACCP管理項目の編集</h3>
+      <input type="hidden" id="haccp-page-id" />
+      <div class="form-group">
+        <label>項目名 <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="haccp-f-name" placeholder="例: 従業員健康管理" />
+      </div>
+      <div class="form-group">
+        <label>大分類</label>
+        <select id="haccp-f-category">
+          <option value="">─ 選択 ─</option>
+          <option>衛生管理</option>
+          <option>温度管理</option>
+          <option>原材料管理</option>
+          <option>品質管理</option>
+          <option>是正処置</option>
+          <option>文書管理</option>
+          <option>外部対応</option>
+          <option>人材育成</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>説明</label>
+        <textarea id="haccp-f-desc" rows="3" placeholder="HACCP管理のポイントや目的を記入"></textarea>
+      </div>
+      <div class="form-group">
+        <label>担当DB</label>
+        <input type="text" id="haccp-f-db" placeholder="例: 体調管理DB、開店前チェックDB" />
+      </div>
+      <div class="form-group">
+        <label>担当DBリンク (URL)</label>
+        <input type="url" id="haccp-f-dblink" placeholder="https://www.notion.so/..." />
+      </div>
+      <div class="form-group">
+        <label>記録頻度</label>
+        <select id="haccp-f-freq">
+          <option value="">─ 選択 ─</option>
+          <option>毎日</option>
+          <option>週次</option>
+          <option>月次</option>
+          <option>都度</option>
+          <option>年次</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>優先度</label>
+        <select id="haccp-f-priority">
+          <option value="">─ 選択 ─</option>
+          <option>高</option>
+          <option>中</option>
+          <option>低</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ステータス</label>
+        <select id="haccp-f-status">
+          <option>有効</option>
+          <option>無効</option>
+          <option>保留</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>順番（数値）</label>
+        <input type="text" id="haccp-f-order" placeholder="1 〜 99" />
+      </div>
+      <div id="haccp-modal-msg" style="min-height:24px;font-size:0.82rem"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closeHACCPModal()">キャンセル</button>
+        <button class="btn btn-primary btn-sm" onclick="saveHACCPItem()">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 8: リンク集 ══════════════════ -->
+<div id="tab-links" class="tab-pane">
+
+  <div class="card">
+    <h2>🔗 アプリ・DBリンク集</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      GASアプリ・各NotionDBへのリンクを管理します。GASのデプロイURLはここで登録してください。
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="loadLinks()">🔄 一覧を読み込む</button>
+      <button class="btn btn-success btn-sm" onclick="openLinkModal(null)">➕ 新規リンクを追加</button>
+    </div>
+    <div id="links-result">
+      <p style="color:var(--muted)">「一覧を読み込む」を押してください。</p>
+    </div>
+  </div>
+
+  <!-- リンク 編集モーダル -->
+  <div id="link-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 id="link-modal-title">リンクの編集</h3>
+      <input type="hidden" id="link-page-id" />
+      <div class="form-group">
+        <label>名称 <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="link-f-name" placeholder="例: HACCP管理アプリ (GAS)" />
+      </div>
+      <div class="form-group">
+        <label>分類</label>
+        <select id="link-f-category">
+          <option value="">─ 選択 ─</option>
+          <option>アプリ</option>
+          <option>Notionページ</option>
+          <option>Webサイト</option>
+          <option>ツール</option>
+          <option>ドキュメント</option>
+          <option>リソース</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>URL</label>
+        <input type="url" id="link-f-url" placeholder="https://..." />
+      </div>
+      <div class="form-group">
+        <label>説明</label>
+        <textarea id="link-f-desc" rows="2" placeholder="このリンクの用途・内容を記入"></textarea>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="link-f-favorite" style="width:auto;margin-right:6px" />よく使う</label>
+      </div>
+      <div id="link-modal-msg" style="min-height:24px;font-size:0.82rem"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closeLinkModal()">キャンセル</button>
+        <button class="btn btn-primary btn-sm" onclick="saveLinkItem()">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 9: 設定 ══════════════════ -->
+<div id="tab-settings" class="tab-pane">
+
+  <div class="card">
+    <h2>⚙️ GAS デプロイ URL 管理</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:12px">
+      GASを再デプロイしてURLが変わった場合、ここで新しいURLを登録してください。<br>
+      登録したURLはブラウザに保存され、次回以降の接続先として使用されます。
+    </p>
+
+    <div class="settings-group">
+      <label>現在の接続URL（サーバー注入値）</label>
+      <div class="url-current" id="current-server-url">読み込み中...</div>
+    </div>
+
+    <div class="settings-group" id="override-section" style="display:none">
+      <label style="color:var(--warning)">⚠️ ブラウザ保存のURL（こちらが優先されます）</label>
+      <div class="url-current" id="current-override-url"></div>
+      <button class="btn btn-danger btn-sm" onclick="clearUrlOverride()">🗑 ブラウザ保存URLを削除して元に戻す</button>
+    </div>
+
+    <div class="settings-group">
+      <label>新しいGAS デプロイ URL を登録</label>
+      <div class="form-row" style="flex-direction:column;align-items:stretch">
+        <input type="url" id="new-gas-url" placeholder="https://script.google.com/macros/s/...../exec" style="width:100%" />
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button class="btn btn-primary btn-sm" onclick="testAndSaveUrl()">🔗 テストして保存</button>
+          <button class="btn btn-outline btn-sm" onclick="saveUrlOnly()">💾 テストせず保存</button>
+        </div>
+      </div>
+      <div id="url-test-result" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🗄️ 接続 DB 設定</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      GAS スクリプトプロパティで設定された DB 接続情報（カスタム設定 / デフォルト）を表示します。
+    </p>
+    <button class="btn btn-outline btn-sm" onclick="loadConfig()">🔄 設定を読み込む</button>
+    <div id="config-result" style="margin-top:12px">
+      <p style="color:var(--muted)">「設定を読み込む」を押してください。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📖 DB 設定の変更方法</h2>
+    <p style="font-size:0.83rem;line-height:1.6">
+      接続するNotionDBを変更するには、GASのスクリプトプロパティを編集します:<br><br>
+      <strong>① </strong><a href="https://script.google.com" target="_blank">script.google.com</a> を開く →「千石蔵HACCP管理システムv5」を選択<br>
+      <strong>② </strong>左側 ⚙️「プロジェクトの設定」→「スクリプトプロパティ」<br>
+      <strong>③ </strong><code>EXISTING_DBS</code> を編集:
+    </p>
+    <pre style="background:var(--bg);padding:12px;border-radius:6px;font-size:0.73rem;overflow:auto;margin-top:10px;line-height:1.5">[
+  { "id": "333f5289a51c80f39bf1f02630b63538", "label": "体調管理",       "dateField": "_title_date", "titleProp": "Auto" },
+  { "id": "73ff570b9c2a4351b19df2b5451e79bd", "label": "開店前チェック", "dateField": "日付" },
+  { "id": "305fa1bec3b94f8483b1adc0688c27c2", "label": "締め作業",       "dateField": "日付" },
+  { "id": "2b5f5289a51c8094992ce73a9c59f756", "label": "水質検査",       "dateField": "実施日 Test date" },
+  { "id": "90807944c8dc481da413792f96a5b074", "label": "CIP・ATP",       "dateField": "日付" }
+]</pre>
+    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px">
+      ※ <code>dateField: "_title_date"</code> は、タイトルに手入力されている「YYYY/MM/DD氏名」形式の日付で検索します。
+      体調管理DBは「作成日時」が入力タイミングのズレ（日付をまたいで入力・後日まとめて入力等）で記録対象日と一致しないことがあるため、
+      created_time ではなくタイトルの日付を使用します。
+    </p>
+    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px">※ スクリプトプロパティ変更後、再デプロイは不要です。即時反映されます。</p>
+    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px">
+      ※ 静的書類保管庫（書類本体スプレッドシート）を変更する場合は <code>DOCUMENTS_SPREADSHEET_ID</code> を設定してください。
+    </p>
+  </div>
+
+</div>
+
+<!-- ══════════════════ Tab 10: デバッグ ══════════════════ -->
+<div id="tab-debug" class="tab-pane">
+
+  <div class="card">
+    <h2>🐛 デバッグツール</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-outline btn-sm" onclick="runConnectionCheck('debug-result')">🔗 Notion 接続確認</button>
+      <button class="btn btn-outline btn-sm" onclick="loadLogs()">📋 ログを見る</button>
+      <button class="btn btn-outline btn-sm" onclick="loadFilteredLogs('ERROR')">🔴 ERROR のみ</button>
+      <button class="btn btn-outline btn-sm" onclick="loadFilteredLogs('WARN')">🟡 WARN 以上</button>
+      <button class="btn btn-danger btn-sm" onclick="clearEl('debug-result')">🗑 クリア</button>
+    </div>
+    <div id="debug-result"></div>
+  </div>
+
+  <div class="card">
+    <h2>⚡ API 直接テスト</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+      任意の Notion DB ID に対してクエリを実行します。
+    </p>
+    <div class="form-row">
+      <input type="text" id="test-dbid" placeholder="Notion DB ID を入力" style="flex:1;min-width:220px" />
+      <button class="btn btn-primary btn-sm" onclick="testQueryDb()">▶ 実行</button>
+    </div>
+    <div id="test-result"></div>
+  </div>
+
+  <div class="card">
+    <h2>📊 API レスポンス計測</h2>
+    <button class="btn btn-outline btn-sm" onclick="measureApiResponseTime()">⏱ レスポンスタイム計測</button>
+    <div id="perf-result" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>📖 トラブルシューティング</h2>
+    <table>
+      <tr><th>症状</th><th>原因</th><th>対処</th></tr>
+      <tr><td>接続確認 ERROR</td><td>トークン未設定 / 期限切れ</td><td>GAS スクリプトプロパティを確認</td></tr>
+      <tr><td>DB が WARN</td><td>インテグレーション未共有</td><td>Notion DB → 接続を追加</td></tr>
+      <tr><td>書類が表示されない</td><td>ステータスが Active でない</td><td>書類マスターDB の「ステータス」を確認</td></tr>
+      <tr><td>日々の記録が 0 件</td><td>体調管理は作成日時で検索</td><td>当日入力した記録があるか Notion で確認</td></tr>
+      <tr><td>水質検査が 0 件</td><td>「実施日 Test date」フィールド</td><td>DB に「実施日 Test date」プロパティがあるか確認</td></tr>
+      <tr><td>ログが記録されない</td><td>Sheet ID 未設定</td><td>DEBUG_LOG_SHEET_ID を設定</td></tr>
+      <tr><td>書類本体一覧が読み込めない</td><td>DOCUMENTS_SPREADSHEET_ID 未設定/権限なし</td><td>スクリプトプロパティ確認・シートへの編集者権限確認</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<!-- ══════════════════ JavaScript ══════════════════ -->
+<script>
+// ─── GAS テンプレートから注入されるサーバーURL ───
+const INJECTED_API_BASE = '<?= API_BASE ?>';
+const GAS_URL_STORAGE_KEY = 'sengokura_gas_url_override';
+
+/** ブラウザ保存のURL上書きがあればそちらを使う */
+function getApiBase() {
+  return localStorage.getItem(GAS_URL_STORAGE_KEY) || INJECTED_API_BASE;
+}
+
+// ─── タブ切り替え ───
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  (btn || document.getElementById('tabbtn-' + name)).classList.add('active');
+}
+
+// ─── API ユーティリティ ───
+async function api(params) {
+  const base = getApiBase();
+  const url  = base + '?' + new URLSearchParams(params).toString();
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+function setHtml(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+function clearEl(id) { setHtml(id, '<p style="color:var(--muted)">クリアしました。</p>'); }
+function loading(id)  { setHtml(id, '<div class="loading"><span class="spinner"></span>読み込み中...</div>'); }
+
+function statusBadge(s) {
+  if (s === 'OK')   return '<span class="badge-ok">✅ OK</span>';
+  if (s === 'WARN') return '<span class="badge-warn">⚠️ WARN</span>';
+  return '<span class="badge-err">❌ ERROR</span>';
+}
+
+function todayStr() {
+  const d = new Date();
+  return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
+
+// ─── 初期化 ───
+function initApp() {
+  // 今日の日付をセット
+  const today = todayStr();
+  document.getElementById('today-label').textContent =
+    new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+  document.getElementById('search-date').value = today;
+  document.getElementById('daily-date').value  = today;
+
+  // 設定タブの URL 表示
+  document.getElementById('current-server-url').textContent = INJECTED_API_BASE || '（GASデプロイURL未設定）';
+  const override = localStorage.getItem(GAS_URL_STORAGE_KEY);
+  if (override) {
+    document.getElementById('override-section').style.display = '';
+    document.getElementById('current-override-url').textContent = override;
+  }
+}
+
+// ══════════════════════════════════════════════
+//  ダッシュボード
+// ══════════════════════════════════════════════
+
+async function runConnectionCheck(targetId) {
+  loading(targetId);
+  try {
+    const t0   = Date.now();
+    const data = await api({ action: 'debugNotionConnection' });
+    const ms   = Date.now() - t0;
+    let html = `<p style="color:var(--muted);font-size:0.75rem;margin-bottom:8px">レスポンスタイム: ${ms}ms</p>
+      <table><tr><th>項目</th><th>ステータス</th><th>詳細</th></tr>`;
+    (data.checks || []).forEach(c => {
+      html += `<tr><td>${c.name}</td><td>${statusBadge(c.status)}</td>
+               <td style="font-size:0.78rem;color:var(--muted)">${c.message}</td></tr>`;
+    });
+    html += '</table>';
+    setHtml(targetId, html);
+  } catch (e) {
+    setHtml(targetId, `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+async function loadTodaySummary() {
+  loading('today-summary');
+  try {
+    const data = await api({ action: 'searchByDate', date: todayStr() });
+    let html = '<table><tr><th>DB名</th><th>件数</th><th>状態</th></tr>';
+    (data.results || []).forEach(r => {
+      html += `<tr><td>${r.dbLabel}</td><td><strong>${r.recordCount ?? 0}</strong> 件</td>
+               <td>${r.error ? statusBadge('ERROR') : statusBadge('OK')}</td></tr>`;
+    });
+    html += '</table>';
+    setHtml('today-summary', html);
+  } catch (e) {
+    setHtml('today-summary', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  書類タブ
+// ══════════════════════════════════════════════
+
+async function loadDocuments() {
+  loading('doc-result');
+  try {
+    const data = await api({ action: 'getDocuments' });
+    if (!data.ok) { setHtml('doc-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    const docs = data.documents || [];
+    if (!docs.length) {
+      setHtml('doc-result', '<p style="color:var(--muted)">書類が見つかりません。書類マスター DB にデータを追加してください。</p>');
+      return;
+    }
+
+    const statusColor = { '未着手': 'var(--muted)', '進行中': 'var(--primary)', '完了': 'var(--success)', '保留': 'var(--warning)' };
+    let html = '<table><tr><th>書類名（カテゴリ）</th><th>用途・内容</th><th>優先度</th><th>保管期間</th><th>ステータス</th><th>リンク</th></tr>';
+    docs.forEach(d => {
+      const link = d.url ? `<a href="${d.url}" target="_blank">🔗 開く</a>` : '—';
+      const sc   = statusColor[d.status] || 'var(--muted)';
+      html += `<tr>
+        <td><strong>${d.name||'—'}</strong></td>
+        <td style="font-size:0.78rem;color:var(--muted)">${d.description||'—'}</td>
+        <td style="font-size:0.78rem">${d.priority||'—'}</td>
+        <td style="font-size:0.78rem">${d.retention||'—'}</td>
+        <td style="font-size:0.78rem;color:${sc}">${d.status||'—'}</td>
+        <td>${link}</td>
+      </tr>`;
+    });
+    html += '</table>';
+    setHtml('doc-result', html);
+  } catch (e) {
+    setHtml('doc-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+/** 静的書類保管庫（スプレッドシート）の書類一覧を読み込み、各書類本体タブへの直リンクを表示 */
+async function loadDocumentMaster() {
+  loading('doc-master-result');
+  try {
+    const data = await api({ action: 'getDocumentMaster' });
+    if (!data.ok) { setHtml('doc-master-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    const docs = data.documents || [];
+    if (!docs.length) {
+      setHtml('doc-master-result', '<p style="color:var(--muted)">書類が見つかりません。</p>');
+      return;
+    }
+
+    let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px">
+      ${docs.length} 件　<a href="${data.spreadsheetUrl}" target="_blank">🔗 スプレッドシート全体を開く</a></p>
+      <div style="overflow-x:auto"><table>
+        <tr><th>No.</th><th>文書番号</th><th>書類名</th><th>カテゴリ</th><th>用途・内容概要</th><th>保管期間</th><th>本体を開く</th></tr>`;
+    docs.forEach(d => {
+      const link = d.refUrl ? `<a href="${d.refUrl}" target="_blank">📄 開く</a>` : (d.refName || '—');
+      html += `<tr>
+        <td style="font-size:0.75rem;color:var(--muted)">${d.no ?? '—'}</td>
+        <td style="font-size:0.76rem;font-family:monospace">${d.docNumber || '—'}</td>
+        <td><strong>${d.name || '—'}</strong></td>
+        <td style="font-size:0.78rem">${d.category || '—'}</td>
+        <td style="font-size:0.78rem;color:var(--muted)">${d.description || '—'}</td>
+        <td style="font-size:0.78rem">${d.retention || '—'}</td>
+        <td>${link}</td>
+      </tr>`;
+    });
+    html += '</table></div>';
+    setHtml('doc-master-result', html);
+  } catch (e) {
+    setHtml('doc-master-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  日々の記録タブ
+// ══════════════════════════════════════════════
+
+async function loadDailyRecords() {
+  const date = document.getElementById('daily-date').value;
+  if (!date) { alert('日付を選択してください'); return; }
+  loading('daily-result');
+  try {
+    const data = await api({ action: 'getDailyRecords', date });
+    if (!data.ok) { setHtml('daily-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">
+      📅 ${date} の記録
+      <button class="btn btn-outline btn-sm" style="margin-left:10px" onclick="jumpToCrossSearch('${date}')">🔍 この日の全DBを横断検索</button>
+    </p>`;
+
+    // ── 体調管理 ──
+    html += `<div class="section-box">
+      <div class="section-box-header">
+        <strong>🏥 体調管理</strong>
+        <span class="badge-${data.health.count > 0 ? 'ok' : 'warn'}">${data.health.count} 件</span>
+      </div>
+      <div class="section-box-body">`;
+
+    if (data.health.error) {
+      html += `<p style="color:var(--danger);font-size:0.8rem">⚠️ ${data.health.error}</p>`;
+    } else if (!data.health.records || !data.health.records.length) {
+      html += '<p style="color:var(--muted);font-size:0.82rem">記録なし</p>';
+    } else {
+      html += '<div class="health-grid">';
+      data.health.records.forEach(r => {
+        const isGood = r.healthStatus && r.healthStatus.includes('Good');
+        html += `<div class="health-card ${isGood ? 'ok' : (r.healthStatus ? 'warn' : '')}">
+          <div class="name">${r.name || '(名前なし)'}</div>
+          <div class="detail">${r.healthStatus || '—'}</div>
+          ${r.temperature ? `<div class="detail">体温: ${r.temperature}℃</div>` : ''}
+          ${r.alcohol !== null && r.alcohol !== undefined ? `<div class="detail">アルコール: ${r.alcohol}</div>` : ''}
+          ${r.done ? '<div class="detail" style="color:var(--success)">✅ 入力完了</div>' : '<div class="detail" style="color:var(--warning)">⏳ 入力中</div>'}
+          ${r.url ? `<div class="detail" style="margin-top:4px"><a href="${r.url}" target="_blank">🔗 Notion で見る</a></div>` : ''}
+        </div>`;
+      });
+      html += '</div>';
+    }
+    html += '</div></div>';
+
+    // ── 開店前チェック ──
+    html += renderCheckSection('🌅 開店前チェック', data.morning);
+
+    // ── 締め作業 ──
+    html += renderCheckSection('🌙 締め作業', data.closing);
+
+    setHtml('daily-result', html);
+  } catch (e) {
+    setHtml('daily-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+/** 日々の記録タブ → 検索タブへジャンプし、その日付で横断検索を即実行する */
+function jumpToCrossSearch(date) {
+  document.getElementById('search-date').value = date;
+  switchTab('search');
+  runSearch();
+}
+
+function renderCheckSection(title, section) {
+  const count = section.count || 0;
+  let html = `<div class="section-box">
+    <div class="section-box-header">
+      <strong>${title}</strong>
+      <span class="badge-${count > 0 ? 'ok' : 'warn'}">${count} 件</span>
+    </div>
+    <div class="section-box-body">`;
+
+  if (section.error) {
+    html += `<p style="color:var(--danger);font-size:0.8rem">⚠️ ${section.error}</p>`;
+  } else if (!section.records || !section.records.length) {
+    html += '<p style="color:var(--muted);font-size:0.82rem">記録なし</p>';
+  } else {
+    html += '<table><tr><th>タイトル</th><th>作成日時</th><th>リンク</th></tr>';
+    section.records.forEach(r => {
+      html += `<tr>
+        <td>${r.title || '(無題)'}</td>
+        <td style="font-size:0.75rem;color:var(--muted)">${fmtDate(r.created)}</td>
+        <td>${r.url ? `<a href="${r.url}" target="_blank">🔗</a>` : '—'}</td>
+      </tr>`;
+    });
+    html += '</table>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+// ══════════════════════════════════════════════
+//  水質検査タブ
+// ══════════════════════════════════════════════
+
+async function loadWaterQuality(allRecords) {
+  const date = allRecords ? '' : document.getElementById('water-date').value;
+  loading('water-result');
+  try {
+    const params = { action: 'getWaterQuality' };
+    if (date) params.date = date;
+    const data = await api(params);
+    if (!data.ok) { setHtml('water-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    const label = date ? `📅 ${date} の検査記録` : '最新100件の検査記録';
+    let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px">${label} — ${data.count} 件</p>`;
+
+    if (!data.records || !data.records.length) {
+      html += '<p style="color:var(--muted)">記録が見つかりませんでした。</p>';
+    } else {
+      html += renderGenericRecords(data.records);
+    }
+    setHtml('water-result', html);
+  } catch (e) {
+    setHtml('water-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  ATP/CIP タブ
+// ══════════════════════════════════════════════
+
+async function loadCIPATP(allRecords) {
+  const date = allRecords ? '' : document.getElementById('cip-date').value;
+  loading('cip-result');
+  try {
+    const params = { action: 'getCIPATP' };
+    if (date) params.date = date;
+    const data = await api(params);
+    if (!data.ok) { setHtml('cip-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    const label = date ? `📅 ${date} の洗浄記録` : '最新100件の洗浄記録';
+    let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px">${label} — ${data.count} 件</p>`;
+
+    if (!data.records || !data.records.length) {
+      html += '<p style="color:var(--muted)">記録が見つかりませんでした。</p>';
+    } else {
+      html += renderGenericRecords(data.records);
+    }
+    setHtml('cip-result', html);
+  } catch (e) {
+    setHtml('cip-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+/** 水質・CIP/ATP など「props」付きレコードの汎用テーブル */
+function renderGenericRecords(records) {
+  // 全レコードのpropsキーを収集（最大6個）
+  const allKeys = new Set();
+  records.forEach(r => {
+    if (r.props) Object.keys(r.props).slice(0, 6).forEach(k => allKeys.add(k));
+  });
+  const keys = [...allKeys].slice(0, 6);
+
+  let html = '<div style="overflow-x:auto"><table>';
+  html += '<tr><th>タイトル</th><th>作成日時</th>';
+  keys.forEach(k => { html += `<th>${k}</th>`; });
+  html += '<th>リンク</th></tr>';
+
+  records.forEach(r => {
+    html += `<tr>
+      <td>${r.title || '(無題)'}</td>
+      <td style="font-size:0.75rem;color:var(--muted);white-space:nowrap">${fmtDate(r.created)}</td>`;
+    keys.forEach(k => {
+      const v = r.props ? r.props[k] : null;
+      const display = v === null || v === undefined ? '—' : (typeof v === 'boolean' ? (v ? '✅' : '—') : String(v));
+      html += `<td style="font-size:0.78rem">${display}</td>`;
+    });
+    html += `<td>${r.url ? `<a href="${r.url}" target="_blank">🔗</a>` : '—'}</td></tr>`;
+  });
+  html += '</table></div>';
+  return html;
+}
+
+// ══════════════════════════════════════════════
+//  日付横断検索タブ
+// ══════════════════════════════════════════════
+
+async function runSearch() {
+  const date = document.getElementById('search-date').value;
+  if (!date) { alert('日付を選択してください'); return; }
+  loading('search-result');
+  try {
+    const data = await api({ action: 'searchByDate', date });
+    if (!data.ok) { setHtml('search-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    let html = `<p style="font-size:0.82rem;color:var(--muted);margin-bottom:12px">検索日: <strong>${date}</strong></p>`;
+    (data.results || []).forEach(r => {
+      html += `<div class="section-box" style="margin-bottom:10px">
+        <div class="section-box-header">
+          <strong>${r.dbLabel}</strong>
+          <span class="badge-${r.error ? 'err' : (r.recordCount > 0 ? 'ok' : 'warn')}">${r.recordCount ?? 0} 件</span>
+        </div>
+        <div class="section-box-body">`;
+
+      if (r.error) {
+        html += `<p style="color:var(--danger);font-size:0.8rem">⚠️ ${r.error}</p>`;
+      } else if (!r.records || !r.records.length) {
+        html += '<p style="color:var(--muted);font-size:0.82rem">記録なし</p>';
+      } else {
+        html += '<table><tr><th>タイトル</th><th>作成日時</th><th>リンク</th></tr>';
+        r.records.forEach(rec => {
+          html += `<tr>
+            <td>${rec.title || '(無題)'}</td>
+            <td style="font-size:0.75rem;color:var(--muted)">${fmtDate(rec.created)}</td>
+            <td>${rec.url ? `<a href="${rec.url}" target="_blank">🔗</a>` : '—'}</td>
+          </tr>`;
+        });
+        html += '</table>';
+      }
+      if (r.dateField) {
+        html += `<p style="font-size:0.72rem;color:var(--muted);margin-top:6px">検索フィールド: ${r.dateField}</p>`;
+      }
+      html += '</div></div>';
+    });
+    setHtml('search-result', html);
+  } catch (e) {
+    setHtml('search-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  設定タブ
+// ══════════════════════════════════════════════
+
+async function testAndSaveUrl() {
+  const url = document.getElementById('new-gas-url').value.trim();
+  if (!url) { alert('URLを入力してください'); return; }
+  if (!url.startsWith('https://script.google.com/')) {
+    alert('GASのURLは https://script.google.com/ から始まる必要があります');
+    return;
+  }
+  setHtml('url-test-result', '<div class="loading"><span class="spinner"></span>テスト中...</div>');
+  try {
+    const res = await fetch(url + '?action=getConfig');
+    const data = await res.json();
+    if (data.ok) {
+      localStorage.setItem(GAS_URL_STORAGE_KEY, url);
+      setHtml('url-test-result', `<p style="color:var(--success)">✅ 接続成功！URLを保存しました。ページをリロードすると新しいURLが使用されます。</p>`);
+      document.getElementById('override-section').style.display = '';
+      document.getElementById('current-override-url').textContent = url;
+    } else {
+      setHtml('url-test-result', `<p style="color:var(--danger)">⚠️ GASに接続できましたが、エラーが返りました: ${data.error}</p>`);
+    }
+  } catch (e) {
+    setHtml('url-test-result', `<p style="color:var(--danger)">❌ 接続失敗: ${e.message}</p>`);
+  }
+}
+
+function saveUrlOnly() {
+  const url = document.getElementById('new-gas-url').value.trim();
+  if (!url) { alert('URLを入力してください'); return; }
+  localStorage.setItem(GAS_URL_STORAGE_KEY, url);
+  setHtml('url-test-result', `<p style="color:var(--success)">💾 URLを保存しました（テストなし）。</p>`);
+  document.getElementById('override-section').style.display = '';
+  document.getElementById('current-override-url').textContent = url;
+}
+
+function clearUrlOverride() {
+  localStorage.removeItem(GAS_URL_STORAGE_KEY);
+  document.getElementById('override-section').style.display = 'none';
+  setHtml('url-test-result', '<p style="color:var(--success)">🗑 ブラウザ保存URLを削除しました。サーバー注入URLに戻ります。</p>');
+}
+
+async function loadConfig() {
+  loading('config-result');
+  try {
+    const data = await api({ action: 'getConfig' });
+    if (!data.ok) { setHtml('config-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    let html = `
+      <p style="font-size:0.82rem;margin-bottom:10px">
+        Notionトークン: ${data.hasToken ? '<span class="badge-ok">設定済み</span>' : '<span class="badge-err">未設定</span>'}
+        &nbsp; 書類マスターDB: ${data.hasDocDb ? '<span class="badge-ok">設定済み</span>' : '<span class="badge-warn">未設定</span>'}
+        &nbsp; 静的書類保管庫: ${data.hasDocSheet ? '<span class="badge-ok">設定済み</span>' : '<span class="badge-warn">未設定</span>'}
+        &nbsp; DB設定: <span class="badge-ok">${data.dbVersion === 'custom' ? 'カスタム（プロパティ設定済み）' : 'デフォルト（発見済みDB使用中）'}</span>
+      </p>
+      <div class="section-label">接続 DB 一覧</div>`;
+
+    (data.dbs || []).forEach(db => {
+      html += `<div class="config-db-row">
+        <span class="config-db-label">${db.label}</span>
+        <span class="config-db-id">${db.idPreview}</span>
+        <span style="font-size:0.73rem;color:var(--muted)">日付フィールド: ${db.dateField}</span>
+      </div>`;
+    });
+    setHtml('config-result', html);
+  } catch (e) {
+    setHtml('config-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  デバッグタブ
+// ══════════════════════════════════════════════
+
+async function loadLogs(levelFilter) {
+  loading('debug-result');
+  try {
+    const data = await api({ action: 'getLogs', limit: '100' });
+    if (!data.ok) { setHtml('debug-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    let logs = data.logs || [];
+    if (levelFilter === 'ERROR') logs = logs.filter(l => l.level === 'ERROR');
+    if (levelFilter === 'WARN')  logs = logs.filter(l => l.level === 'ERROR' || l.level === 'WARN');
+
+    if (!logs.length) { setHtml('debug-result', '<p style="color:var(--muted)">ログがありません。</p>'); return; }
+
+    const html = logs.map(l => `
+      <div class="log-entry log-${l.level}">
+        <span style="color:var(--muted)">${l.timestamp}</span>
+        <strong style="margin:0 6px">[${l.level}]</strong>
+        <span style="color:var(--primary)">${l.context}</span>
+        <span style="margin-left:8px">${l.message}</span>
+        ${l.stack ? `<details style="margin-top:3px"><summary style="cursor:pointer;font-size:0.7rem">スタック</summary>
+          <pre style="font-size:0.68rem;overflow:auto;white-space:pre-wrap;margin-top:3px">${l.stack}</pre></details>` : ''}
+      </div>`).join('');
+    setHtml('debug-result', `<p style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">${logs.length} 件表示</p>` + html);
+  } catch (e) {
+    setHtml('debug-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+function loadFilteredLogs(level) { loadLogs(level); }
+
+async function testQueryDb() {
+  const dbId = document.getElementById('test-dbid').value.trim();
+  if (!dbId) { alert('DB ID を入力してください'); return; }
+  loading('test-result');
+  try {
+    const t0   = Date.now();
+    const data = await api({ action: 'queryDB', dbId });
+    const ms   = Date.now() - t0;
+    const count = data.results ? data.results.length : 0;
+    const html = data.ok
+      ? `<p style="color:var(--success)">✅ 成功: ${count} 件取得 (${ms}ms)</p>
+         <pre style="background:var(--bg);padding:10px;border-radius:6px;font-size:0.71rem;overflow:auto;max-height:260px">${
+           JSON.stringify(data.results && data.results[0], null, 2)
+         }</pre>`
+      : `<p style="color:var(--danger)">❌ エラー: ${data.error} (${ms}ms)</p>`;
+    setHtml('test-result', html);
+  } catch (e) {
+    setHtml('test-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+async function measureApiResponseTime() {
+  loading('perf-result');
+  const actions = [
+    { action: 'getConfig' },
+    { action: 'searchByDate', date: todayStr() },
+    { action: 'getDailyRecords', date: todayStr() },
+    { action: 'getWaterQuality' },
+  ];
+  const results = [];
+  for (const params of actions) {
+    const t0 = Date.now();
+    try {
+      await api(params);
+      results.push({ action: params.action, ms: Date.now() - t0, ok: true });
+    } catch (e) {
+      results.push({ action: params.action, ms: Date.now() - t0, ok: false, error: e.message });
+    }
+  }
+  let html = '<table><tr><th>API Action</th><th>レスポンスタイム</th><th>結果</th></tr>';
+  results.forEach(r => {
+    const color = r.ms < 2000 ? 'var(--success)' : (r.ms < 5000 ? 'var(--warning)' : 'var(--danger)');
+    html += `<tr><td>${r.action}</td><td style="color:${color};font-weight:600">${r.ms}ms</td><td>${r.ok ? '✅' : '❌ ' + (r.error||'')}</td></tr>`;
+  });
+  html += '</table>';
+  setHtml('perf-result', html);
+}
+
+// ══════════════════════════════════════════════
+//  HACCP管理項目タブ
+// ══════════════════════════════════════════════
+
+let _haccpItems = [];
+
+async function loadHACCPItems() {
+  loading('haccp-result');
+  try {
+    const data = await api({ action: 'getHACCPItems' });
+    if (!data.ok) { setHtml('haccp-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    _haccpItems = data.items || [];
+    if (!_haccpItems.length) {
+      setHtml('haccp-result', '<p style="color:var(--muted)">項目が見つかりません。</p>');
+      return;
+    }
+
+    const priorityColor = { '高': 'var(--danger)', '中': 'var(--warning)', '低': 'var(--muted)' };
+    let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px">${_haccpItems.length} 項目</p>
+      <div style="overflow-x:auto"><table>
+        <tr><th>#</th><th>項目名</th><th>大分類</th><th>記録頻度</th><th>優先度</th><th>担当DB</th><th>ステータス</th><th></th></tr>`;
+
+    _haccpItems.forEach((item, i) => {
+      const pcolor = priorityColor[item['優先度']] || 'var(--muted)';
+      const dbLink = item['担当DBリンク'] ? `<a href="${item['担当DBリンク']}" target="_blank" title="${item['担当DB']}">🔗</a>` : (item['担当DB'] || '—');
+      html += `<tr>
+        <td style="color:var(--muted);font-size:0.75rem">${item['順番'] ?? (i+1)}</td>
+        <td><strong>${item['項目名']}</strong>${item['説明'] ? `<br><span style="font-size:0.73rem;color:var(--muted)">${item['説明'].substring(0,40)}${item['説明'].length>40?'…':''}</span>` : ''}</td>
+        <td><span style="font-size:0.78rem">${item['大分類'] || '—'}</span></td>
+        <td style="font-size:0.78rem">${item['記録頻度'] || '—'}</td>
+        <td style="color:${pcolor};font-weight:700;font-size:0.78rem">${item['優先度'] || '—'}</td>
+        <td style="font-size:0.78rem">${dbLink}</td>
+        <td><span style="font-size:0.73rem;color:${item['ステータス']==='有効'?'var(--success)':'var(--muted)'}">${item['ステータス'] || '—'}</span></td>
+        <td><button class="btn btn-outline btn-sm" onclick="openHACCPModal('${item.id}')">✏️ 編集</button></td>
+      </tr>`;
+    });
+    html += '</table></div>';
+    setHtml('haccp-result', html);
+  } catch (e) {
+    setHtml('haccp-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+function openHACCPModal(pageId) {
+  const modal = document.getElementById('haccp-modal');
+  setHtml('haccp-modal-msg', '');
+
+  if (pageId) {
+    const item = _haccpItems.find(i => i.id === pageId);
+    document.getElementById('haccp-modal-title').textContent = '✏️ HACCP管理項目の編集';
+    document.getElementById('haccp-page-id').value    = pageId;
+    document.getElementById('haccp-f-name').value     = item ? item['項目名']       : '';
+    document.getElementById('haccp-f-category').value = item ? (item['大分類'] || '') : '';
+    document.getElementById('haccp-f-desc').value     = item ? item['説明']         : '';
+    document.getElementById('haccp-f-db').value       = item ? item['担当DB']       : '';
+    document.getElementById('haccp-f-dblink').value   = item ? item['担当DBリンク'] : '';
+    document.getElementById('haccp-f-freq').value     = item ? (item['記録頻度'] || '') : '';
+    document.getElementById('haccp-f-priority').value = item ? (item['優先度'] || '') : '';
+    document.getElementById('haccp-f-status').value   = item ? (item['ステータス'] || '有効') : '有効';
+    document.getElementById('haccp-f-order').value    = item ? (item['順番'] ?? '') : '';
+  } else {
+    document.getElementById('haccp-modal-title').textContent = '➕ HACCP管理項目の追加';
+    document.getElementById('haccp-page-id').value    = '';
+    ['haccp-f-name','haccp-f-desc','haccp-f-db','haccp-f-dblink','haccp-f-order'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('haccp-f-category').value = '';
+    document.getElementById('haccp-f-freq').value     = '';
+    document.getElementById('haccp-f-priority').value = '高';
+    document.getElementById('haccp-f-status').value   = '有効';
+  }
+
+  modal.classList.add('open');
+}
+
+function closeHACCPModal() {
+  document.getElementById('haccp-modal').classList.remove('open');
+}
+
+async function saveHACCPItem() {
+  const pageId = document.getElementById('haccp-page-id').value.trim();
+  const params = {
+    '項目名':       document.getElementById('haccp-f-name').value.trim(),
+    '大分類':       document.getElementById('haccp-f-category').value,
+    '説明':         document.getElementById('haccp-f-desc').value.trim(),
+    '担当DB':       document.getElementById('haccp-f-db').value.trim(),
+    '担当DBリンク': document.getElementById('haccp-f-dblink').value.trim(),
+    '記録頻度':     document.getElementById('haccp-f-freq').value,
+    '優先度':       document.getElementById('haccp-f-priority').value,
+    'ステータス':   document.getElementById('haccp-f-status').value,
+    '順番':         document.getElementById('haccp-f-order').value,
+  };
+  if (!params['項目名']) {
+    setHtml('haccp-modal-msg', '<span style="color:var(--danger)">項目名は必須です</span>');
+    return;
+  }
+  setHtml('haccp-modal-msg', '<span style="color:var(--muted)"><span class="spinner"></span>保存中...</span>');
+
+  try {
+    const action = pageId ? 'updateHACCPItem' : 'createHACCPItem';
+    if (pageId) params.pageId = pageId;
+    const data = await api({ action, ...params });
+    if (!data.ok) {
+      setHtml('haccp-modal-msg', `<span style="color:var(--danger)">エラー: ${data.error}</span>`);
+      return;
+    }
+    setHtml('haccp-modal-msg', '<span style="color:var(--success)">✅ 保存しました！</span>');
+    setTimeout(() => { closeHACCPModal(); loadHACCPItems(); }, 800);
+  } catch (e) {
+    setHtml('haccp-modal-msg', `<span style="color:var(--danger)">エラー: ${e.message}</span>`);
+  }
+}
+
+// モーダル外クリックで閉じる
+document.addEventListener('click', e => {
+  if (e.target.id === 'haccp-modal') closeHACCPModal();
+  if (e.target.id === 'link-modal')  closeLinkModal();
+});
+
+// ══════════════════════════════════════════════
+//  リンク集タブ
+// ══════════════════════════════════════════════
+
+let _linkItems = [];
+
+async function loadLinks() {
+  loading('links-result');
+  try {
+    const data = await api({ action: 'getLinks' });
+    if (!data.ok) { setHtml('links-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+
+    _linkItems = data.links || [];
+    if (!_linkItems.length) {
+      setHtml('links-result', '<p style="color:var(--muted)">リンクが見つかりません。</p>');
+      return;
+    }
+
+    // 分類ごとにグループ化
+    const groups = {};
+    _linkItems.forEach(item => {
+      const cat = item['分類'] || 'その他';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(item);
+    });
+
+    let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px">${_linkItems.length} 件</p>`;
+    Object.entries(groups).forEach(([cat, items]) => {
+      html += `<div class="section-label">${cat}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:14px">`;
+      items.forEach(item => {
+        html += `<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;position:relative">
+          <div style="font-weight:700;font-size:0.88rem;margin-bottom:4px">
+            ${item.link ? `<a href="${item.link}" target="_blank">${item['名称']}</a>` : item['名称']}
+          </div>
+          <div style="font-size:0.75rem;color:var(--muted)">${item['説明'] || ''}</div>
+          ${item.link ? `<div style="font-size:0.72rem;color:var(--primary);margin-top:4px;word-break:break-all">${item.link.replace('https://','')}</div>` : '<div style="font-size:0.72rem;color:var(--danger);margin-top:4px">URL未登録</div>'}
+          ${item['よく使う'] ? '<div style="font-size:0.72rem;color:var(--warning);margin-top:4px">⭐ よく使う</div>' : ''}
+          <div style="margin-top:8px">
+            <button class="btn btn-outline btn-sm" onclick="openLinkModal('${item.id}')">✏️ 編集</button>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    setHtml('links-result', html);
+  } catch (e) {
+    setHtml('links-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+  }
+}
+
+function openLinkModal(itemId) {
+  const modal = document.getElementById('link-modal');
+  setHtml('link-modal-msg', '');
+
+  if (itemId) {
+    const item = _linkItems.find(i => i.id === itemId);
+    document.getElementById('link-modal-title').textContent = '✏️ リンクの編集';
+    document.getElementById('link-page-id').value    = itemId;
+    document.getElementById('link-f-name').value     = item ? item['名称']       : '';
+    document.getElementById('link-f-category').value = item ? (item['分類'] || '') : '';
+    document.getElementById('link-f-url').value      = item ? (item.link || '')   : '';
+    document.getElementById('link-f-desc').value     = item ? (item['説明'] || '') : '';
+    document.getElementById('link-f-favorite').checked = item ? !!item['よく使う'] : false;
+  } else {
+    document.getElementById('link-modal-title').textContent = '➕ リンクの追加';
+    document.getElementById('link-page-id').value    = '';
+    ['link-f-name','link-f-url','link-f-desc'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('link-f-category').value = 'Notionページ';
+    document.getElementById('link-f-favorite').checked = false;
+  }
+  modal.classList.add('open');
+}
+
+function closeLinkModal() {
+  document.getElementById('link-modal').classList.remove('open');
+}
+
+async function saveLinkItem() {
+  const pageId = document.getElementById('link-page-id').value.trim();
+  const params = {
+    '名称':     document.getElementById('link-f-name').value.trim(),
+    '分類':     document.getElementById('link-f-category').value,
+    'link':     document.getElementById('link-f-url').value.trim(),
+    '説明':     document.getElementById('link-f-desc').value.trim(),
+    'よく使う': document.getElementById('link-f-favorite').checked,
+  };
+  if (!params['名称']) {
+    setHtml('link-modal-msg', '<span style="color:var(--danger)">名称は必須です</span>');
+    return;
+  }
+  setHtml('link-modal-msg', '<span style="color:var(--muted)"><span class="spinner"></span>保存中...</span>');
+
+  try {
+    const action = pageId ? 'updateLink' : 'createLink';
+    if (pageId) params.pageId = pageId;
+    const data = await api({ action, ...params });
+    if (!data.ok) {
+      setHtml('link-modal-msg', `<span style="color:var(--danger)">エラー: ${data.error}</span>`);
+      return;
+    }
+    setHtml('link-modal-msg', '<span style="color:var(--success)">✅ 保存しました！</span>');
+    setTimeout(() => { closeLinkModal(); loadLinks(); }, 800);
+  } catch (e) {
+    setHtml('link-modal-msg', `<span style="color:var(--danger)">エラー: ${e.message}</span>`);
+  }
+}
+
+// ─── 初期化 ───
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
