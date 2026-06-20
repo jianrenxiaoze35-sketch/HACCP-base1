@@ -808,9 +808,10 @@ async function loadDocuments() {
     }
 
     const statusColor = { '未着手': 'var(--muted)', '進行中': 'var(--primary)', '完了': 'var(--success)', '保留': 'var(--warning)' };
-    let html = '<table><tr><th>書類名（カテゴリ）</th><th>用途・内容</th><th>優先度</th><th>保管期間</th><th>ステータス</th><th>リンク</th></tr>';
+    let html = '<table><tr><th>書類名（カテゴリ）</th><th>用途・内容</th><th>優先度</th><th>保管期間</th><th>ステータス</th><th>添付リンク</th><th>Notionページ</th></tr>';
     docs.forEach(d => {
-      const link = d.url ? `<a href="${d.url}" target="_blank">🔗 開く</a>` : '—';
+      const link      = d.url       ? `<a href="${d.url}" target="_blank">🔗 開く</a>` : '—';
+      const notionLink = d.notionUrl ? `<a href="${d.notionUrl}" target="_blank">📄 開く</a>` : '—';
       const sc   = statusColor[d.status] || 'var(--muted)';
       html += `<tr>
         <td><strong>${d.name||'—'}</strong></td>
@@ -819,6 +820,7 @@ async function loadDocuments() {
         <td style="font-size:0.78rem">${d.retention||'—'}</td>
         <td style="font-size:0.78rem;color:${sc}">${d.status||'—'}</td>
         <td>${link}</td>
+        <td>${notionLink}</td>
       </tr>`;
     });
     html += '</table>';
