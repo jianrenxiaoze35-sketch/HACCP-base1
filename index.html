@@ -19,8 +19,36 @@
     --water:        #0891b2;
     --health:       #7c3aed;
   }
+  html[data-theme="dark"] {
+    --primary:      #3b82f6;
+    --primary-dark: #1e3a8a;
+    --success:      #34d399;
+    --warning:      #fbbf24;
+    --danger:       #f87171;
+    --bg:           #0f1117;
+    --card:         #1a1d27;
+    --text:         #e5e7eb;
+    --muted:        #9ca3af;
+    --border:       #2d313d;
+    --water:        #22d3ee;
+    --health:       #a78bfa;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
+
+  /* ─── ダークモード切替ボタン ─── */
+  .theme-toggle {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .theme-toggle:hover { background: rgba(255,255,255,0.3); }
 
   /* ─── ヘッダー ─── */
   header {
@@ -271,6 +299,7 @@
   <div style="flex:1">
     <h1>🍺 千石蔵ビアホール　HACCP管理システム</h1>
   </div>
+  <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="ダークモード切替">🌙</button>
   <span class="ver-badge">v5.3</span>
 </header>
 
@@ -688,6 +717,25 @@
 // ─── GAS テンプレートから注入されるサーバーURL ───
 const INJECTED_API_BASE = '<?= API_BASE ?>';
 const GAS_URL_STORAGE_KEY = 'sengokura_gas_url_override';
+const THEME_STORAGE_KEY = 'sengokura_theme';
+
+// ─── ダークモード ───
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_STORAGE_KEY, next);
+  applyTheme(next);
+}
+(function initTheme() {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+})();
 
 /** ブラウザ保存のURL上書きがあればそちらを使う */
 function getApiBase() {
