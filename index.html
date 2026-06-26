@@ -36,8 +36,8 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
 
-  /* ─── ダークモード切替ボタン ─── */
-  .theme-toggle {
+  /* ─── ダークモード・言語切替ボタン ─── */
+  .theme-toggle, .lang-toggle {
     background: rgba(255,255,255,0.15);
     border: none;
     border-radius: 50%;
@@ -48,7 +48,8 @@
     display: flex; align-items: center; justify-content: center;
     transition: background 0.15s;
   }
-  .theme-toggle:hover { background: rgba(255,255,255,0.3); }
+  .theme-toggle:hover, .lang-toggle:hover { background: rgba(255,255,255,0.3); }
+  .lang-toggle { border-radius: 16px; width: auto; padding: 4px 8px; font-size: 0.75rem; }
 
   /* ─── ヘッダー ─── */
   header {
@@ -163,6 +164,7 @@
     font-size: 0.82rem;
     background: var(--card);
     font-family: inherit;
+    color: var(--text);
   }
   textarea { width: 100%; resize: vertical; min-height: 80px; }
 
@@ -252,6 +254,7 @@
     width: 100%; padding: 7px 11px;
     border: 1px solid var(--border); border-radius: 6px;
     font-size: 0.82rem; font-family: inherit;
+    background: var(--card); color: var(--text);
   }
   .form-group select { background: var(--card); }
   .modal-footer { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
@@ -297,42 +300,51 @@
 <!-- ══════════════════ ヘッダー ══════════════════ -->
 <header>
   <div style="flex:1">
-    <h1>🍺 千石蔵ビアホール　HACCP管理システム</h1>
+    <h1 data-i18n="app.title">🍺 千石蔵ビアホール　HACCP管理システム</h1>
   </div>
+  <button id="lang-toggle-btn" class="lang-toggle" onclick="toggleLanguage()" title="Language / 言語">
+    <span id="lang-display">JP</span>
+  </button>
   <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="ダークモード切替">🌙</button>
   <span class="ver-badge">v5.3</span>
 </header>
 
 <!-- ══════════════════ タブバー ══════════════════ -->
 <div class="tabs">
-  <button id="tabbtn-dashboard" class="tab-btn active" onclick="switchTab('dashboard',this)">📊 ダッシュボード</button>
-  <button id="tabbtn-documents" class="tab-btn"        onclick="switchTab('documents',this)">📚 書類</button>
-  <button id="tabbtn-daily"     class="tab-btn"        onclick="switchTab('daily',this)"    >📋 日々の記録</button>
-  <button id="tabbtn-water"     class="tab-btn"        onclick="switchTab('water',this)"    >💧 水質検査</button>
-  <button id="tabbtn-cip"       class="tab-btn"        onclick="switchTab('cip',this)"      >🧼 ATP/CIP</button>
-  <button id="tabbtn-search"    class="tab-btn"        onclick="switchTab('search',this)"   >🔍 検索</button>
-  <button id="tabbtn-haccp"     class="tab-btn"        onclick="switchTab('haccp',this)"    >🎯 HACCP管理項目</button>
-  <button id="tabbtn-links"     class="tab-btn"        onclick="switchTab('links',this)"    >🔗 リンク集</button>
-  <button id="tabbtn-settings"  class="tab-btn"        onclick="switchTab('settings',this)" >⚙️ 設定</button>
-  <button id="tabbtn-debug"     class="tab-btn"        onclick="switchTab('debug',this)"    >🐛 デバッグ</button>
+  <button id="tabbtn-dashboard" class="tab-btn active" onclick="switchTab('dashboard',this)" data-i18n="tab.dashboard">📊 ダッシュボード</button>
+  <button id="tabbtn-documents" class="tab-btn"        onclick="switchTab('documents',this)" data-i18n="tab.documents">📚 書類</button>
+  <button id="tabbtn-daily"     class="tab-btn"        onclick="switchTab('daily',this)"     data-i18n="tab.daily">📋 日々の記録</button>
+  <button id="tabbtn-water"     class="tab-btn"        onclick="switchTab('water',this)"     data-i18n="tab.water">💧 水質検査</button>
+  <button id="tabbtn-cip"       class="tab-btn"        onclick="switchTab('cip',this)"       data-i18n="tab.cip">🧼 ATP/CIP</button>
+  <button id="tabbtn-search"    class="tab-btn"        onclick="switchTab('search',this)"    data-i18n="tab.search">🔍 検索</button>
+  <button id="tabbtn-haccp"     class="tab-btn"        onclick="switchTab('haccp',this)"     data-i18n="tab.haccp">🎯 HACCP管理項目</button>
+  <button id="tabbtn-links"     class="tab-btn"        onclick="switchTab('links',this)"     data-i18n="tab.links">🔗 リンク集</button>
+  <button id="tabbtn-settings"  class="tab-btn"        onclick="switchTab('settings',this)"  data-i18n="tab.settings">⚙️ 設定</button>
+  <button id="tabbtn-debug"     class="tab-btn"        onclick="switchTab('debug',this)"     data-i18n="tab.debug">🐛 デバッグ</button>
 </div>
 
 <!-- ══════════════════ Tab 1: ダッシュボード ══════════════════ -->
 <div id="tab-dashboard" class="tab-pane active">
 
   <div class="card">
-    <h2>🔗 システム接続状態</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">Notion 接続・各 DB のアクセス権を診断します。</p>
-    <button class="btn btn-primary" onclick="runConnectionCheck('connection-result')">接続確認を実行</button>
+    <h2 data-i18n="dashboard.connection.title">🔗 システム接続状態</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="dashboard.connection.desc">
+      Notion 接続・各 DB のアクセス権を診断します。
+    </p>
+    <button class="btn btn-primary" onclick="runConnectionCheck('connection-result')" data-i18n="dashboard.connection.button">
+      接続確認を実行
+    </button>
     <div id="connection-result" style="margin-top:14px"></div>
   </div>
 
   <div class="card">
-    <h2>📅 本日の記録サマリー</h2>
+    <h2 data-i18n="dashboard.today.title">📅 本日の記録サマリー</h2>
     <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
-      本日（<span id="today-label"></span>）の各 DB 記録件数を集計します。
+      <span data-i18n="dashboard.today.desc1">本日（</span><span id="today-label"></span><span data-i18n="dashboard.today.desc2">）の各 DB 記録件数を集計します。</span>
     </p>
-    <button class="btn btn-outline" onclick="loadTodaySummary()">📥 本日の記録を読み込む</button>
+    <button class="btn btn-outline" onclick="loadTodaySummary()" data-i18n="dashboard.today.button">
+      📥 本日の記録を読み込む
+    </button>
     <div id="today-summary" style="margin-top:14px"></div>
   </div>
 
@@ -342,25 +354,29 @@
 <div id="tab-documents" class="tab-pane">
 
   <div class="card">
-    <h2>📚 HACCP必須書類マスター（Notion）</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="documents.master.title">📚 HACCP必須書類マスター（Notion）</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="documents.master.desc">
       書類マスター DB（ステータス: Active）を自動読み込みします。
     </p>
-    <button class="btn btn-primary" onclick="loadDocuments()">🔄 書類を読み込む</button>
+    <button class="btn btn-primary" onclick="loadDocuments()" data-i18n="documents.master.button">
+      🔄 書類を読み込む
+    </button>
     <div id="doc-result" style="margin-top:14px">
-      <p style="color:var(--muted)">「書類を読み込む」を押してください。</p>
+      <p style="color:var(--muted)" data-i18n="documents.master.hint">「書類を読み込む」を押してください。</p>
     </div>
   </div>
 
   <div class="card">
-    <h2>📁 静的書類保管庫（スプレッドシート）</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="documents.static.title">📁 静的書類保管庫（スプレッドシート）</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="documents.static.desc">
       HACCP書類16点の本体（組織図・危害要因分析表・CCP決定表など）はスプレッドシートの各シートタブに格納されています。
       文書番号で Notion 側書類マスターと相互参照できます。
     </p>
-    <button class="btn btn-primary" onclick="loadDocumentMaster()">🔄 書類本体一覧を読み込む</button>
+    <button class="btn btn-primary" onclick="loadDocumentMaster()" data-i18n="documents.static.button">
+      🔄 書類本体一覧を読み込む
+    </button>
     <div id="doc-master-result" style="margin-top:14px">
-      <p style="color:var(--muted)">「書類本体一覧を読み込む」を押してください。</p>
+      <p style="color:var(--muted)" data-i18n="documents.static.hint">「書類本体一覧を読み込む」を押してください。</p>
     </div>
   </div>
 
@@ -370,13 +386,13 @@
 <div id="tab-daily" class="tab-pane">
 
   <div class="card">
-    <h2>📋 日々の記録</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="daily.title">📋 日々の記録</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="daily.desc">
       体調管理・開店前チェック・締め作業の記録を日付で確認します。
     </p>
     <div class="form-row">
       <input type="date" id="daily-date" />
-      <button class="btn btn-primary" onclick="loadDailyRecords()">📋 記録を読み込む</button>
+      <button class="btn btn-primary" onclick="loadDailyRecords()" data-i18n="daily.button">📋 記録を読み込む</button>
     </div>
     <div id="daily-result"></div>
   </div>
@@ -387,16 +403,18 @@
 <div id="tab-water" class="tab-pane">
 
   <div class="card">
-    <h2>💧 水質検査記録</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="water.title">💧 水質検査記録</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="water.desc">
       水質検査DB（実施日 Test date フィールド）から記録を取得します。日付を空欄にすると最新100件を表示します。
     </p>
     <div class="form-row">
       <input type="date" id="water-date" />
-      <button class="btn btn-primary" onclick="loadWaterQuality()">💧 検索</button>
-      <button class="btn btn-outline btn-sm" onclick="loadWaterQuality(true)">最新100件</button>
+      <button class="btn btn-primary" onclick="loadWaterQuality()" data-i18n="water.button.search">💧 検索</button>
+      <button class="btn btn-outline btn-sm" onclick="loadWaterQuality(true)" data-i18n="water.button.latest">最新100件</button>
     </div>
-    <div id="water-result"><p style="color:var(--muted)">日付を選択するか「最新100件」を押してください。</p></div>
+    <div id="water-result">
+      <p style="color:var(--muted)" data-i18n="water.hint">日付を選択するか「最新100件」を押してください。</p>
+    </div>
   </div>
 
 </div>
@@ -405,16 +423,18 @@
 <div id="tab-cip" class="tab-pane">
 
   <div class="card">
-    <h2>🧼 CIP・ATP 洗浄管理記録</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="cip.title">🧼 CIP・ATP 洗浄管理記録</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="cip.desc">
       CIP・ATP 洗浄管理 DB から記録を取得します。日付を空欄にすると最新100件を表示します。
     </p>
     <div class="form-row">
       <input type="date" id="cip-date" />
-      <button class="btn btn-primary" onclick="loadCIPATP()">🧼 検索</button>
-      <button class="btn btn-outline btn-sm" onclick="loadCIPATP(true)">最新100件</button>
+      <button class="btn btn-primary" onclick="loadCIPATP()" data-i18n="cip.button.search">🧼 検索</button>
+      <button class="btn btn-outline btn-sm" onclick="loadCIPATP(true)" data-i18n="cip.button.latest">最新100件</button>
     </div>
-    <div id="cip-result"><p style="color:var(--muted)">日付を選択するか「最新100件」を押してください。</p></div>
+    <div id="cip-result">
+      <p style="color:var(--muted)" data-i18n="cip.hint">日付を選択するか「最新100件」を押してください。</p>
+    </div>
   </div>
 
 </div>
@@ -423,13 +443,13 @@
 <div id="tab-search" class="tab-pane">
 
   <div class="card">
-    <h2>🔍 日付横断検索</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="search.title">🔍 日付横断検索</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="search.desc">
       登録された全 DB を指定日付で横断検索し、タイムライン形式で表示します。
     </p>
     <div class="form-row">
       <input type="date" id="search-date" />
-      <button class="btn btn-primary" onclick="runSearch()">🔍 検索</button>
+      <button class="btn btn-primary" onclick="runSearch()" data-i18n="search.button">🔍 検索</button>
     </div>
     <div id="search-result"></div>
   </div>
@@ -440,30 +460,30 @@
 <div id="tab-haccp" class="tab-pane">
 
   <div class="card">
-    <h2>🎯 HACCP管理項目マスター</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="haccp.title">🎯 HACCP管理項目マスター</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="haccp.desc">
       12項目のHACCP管理要求事項を管理します。大分類・説明・担当DB・優先度などを編集できます。
     </p>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="loadHACCPItems()">🔄 一覧を読み込む</button>
-      <button class="btn btn-success btn-sm" onclick="openHACCPModal(null)">➕ 新規項目を追加</button>
+      <button class="btn btn-primary" onclick="loadHACCPItems()" data-i18n="haccp.button.reload">🔄 一覧を読み込む</button>
+      <button class="btn btn-success btn-sm" onclick="openHACCPModal(null)" data-i18n="haccp.button.add">➕ 新規項目を追加</button>
     </div>
     <div id="haccp-result">
-      <p style="color:var(--muted)">「一覧を読み込む」を押してください。</p>
+      <p style="color:var(--muted)" data-i18n="haccp.hint">「一覧を読み込む」を押してください。</p>
     </div>
   </div>
 
   <!-- HACCP 編集モーダル -->
   <div id="haccp-modal" class="modal-overlay">
     <div class="modal-box">
-      <h3 id="haccp-modal-title">HACCP管理項目の編集</h3>
+      <h3 id="haccp-modal-title" data-i18n="haccp.modal.title">HACCP管理項目の編集</h3>
       <input type="hidden" id="haccp-page-id" />
       <div class="form-group">
-        <label>項目名 <span style="color:var(--danger)">*</span></label>
+        <label data-i18n="haccp.modal.name">項目名 <span style="color:var(--danger)">*</span></label>
         <input type="text" id="haccp-f-name" placeholder="例: 従業員健康管理" />
       </div>
       <div class="form-group">
-        <label>大分類</label>
+        <label data-i18n="haccp.modal.category">大分類</label>
         <select id="haccp-f-category">
           <option value="">─ 選択 ─</option>
           <option>衛生管理</option>
@@ -477,19 +497,19 @@
         </select>
       </div>
       <div class="form-group">
-        <label>説明</label>
+        <label data-i18n="haccp.modal.desc">説明</label>
         <textarea id="haccp-f-desc" rows="3" placeholder="HACCP管理のポイントや目的を記入"></textarea>
       </div>
       <div class="form-group">
-        <label>担当DB</label>
+        <label data-i18n="haccp.modal.db">担当DB</label>
         <input type="text" id="haccp-f-db" placeholder="例: 体調管理DB、開店前チェックDB" />
       </div>
       <div class="form-group">
-        <label>担当DBリンク (URL)</label>
+        <label data-i18n="haccp.modal.dblink">担当DBリンク (URL)</label>
         <input type="url" id="haccp-f-dblink" placeholder="https://www.notion.so/..." />
       </div>
       <div class="form-group">
-        <label>記録頻度</label>
+        <label data-i18n="haccp.modal.freq">記録頻度</label>
         <select id="haccp-f-freq">
           <option value="">─ 選択 ─</option>
           <option>毎日</option>
@@ -500,7 +520,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label>優先度</label>
+        <label data-i18n="haccp.modal.priority">優先度</label>
         <select id="haccp-f-priority">
           <option value="">─ 選択 ─</option>
           <option>高</option>
@@ -509,7 +529,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label>ステータス</label>
+        <label data-i18n="haccp.modal.status">ステータス</label>
         <select id="haccp-f-status">
           <option>有効</option>
           <option>無効</option>
@@ -517,13 +537,13 @@
         </select>
       </div>
       <div class="form-group">
-        <label>順番（数値）</label>
+        <label data-i18n="haccp.modal.order">順番（数値）</label>
         <input type="text" id="haccp-f-order" placeholder="1 〜 99" />
       </div>
       <div id="haccp-modal-msg" style="min-height:24px;font-size:0.82rem"></div>
       <div class="modal-footer">
-        <button class="btn btn-outline btn-sm" onclick="closeHACCPModal()">キャンセル</button>
-        <button class="btn btn-primary btn-sm" onclick="saveHACCPItem()">💾 保存</button>
+        <button class="btn btn-outline btn-sm" onclick="closeHACCPModal()" data-i18n="common.cancel">キャンセル</button>
+        <button class="btn btn-primary btn-sm" onclick="saveHACCPItem()" data-i18n="common.save">💾 保存</button>
       </div>
     </div>
   </div>
@@ -534,30 +554,30 @@
 <div id="tab-links" class="tab-pane">
 
   <div class="card">
-    <h2>🔗 アプリ・DBリンク集</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="links.title">🔗 アプリ・DBリンク集</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="links.desc">
       GASアプリ・各NotionDBへのリンクを管理します。GASのデプロイURLはここで登録してください。
     </p>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="loadLinks()">🔄 一覧を読み込む</button>
-      <button class="btn btn-success btn-sm" onclick="openLinkModal(null)">➕ 新規リンクを追加</button>
+      <button class="btn btn-primary" onclick="loadLinks()" data-i18n="links.button.reload">🔄 一覧を読み込む</button>
+      <button class="btn btn-success btn-sm" onclick="openLinkModal(null)" data-i18n="links.button.add">➕ 新規リンクを追加</button>
     </div>
     <div id="links-result">
-      <p style="color:var(--muted)">「一覧を読み込む」を押してください。</p>
+      <p style="color:var(--muted)" data-i18n="links.hint">「一覧を読み込む」を押してください。</p>
     </div>
   </div>
 
   <!-- リンク 編集モーダル -->
   <div id="link-modal" class="modal-overlay">
     <div class="modal-box">
-      <h3 id="link-modal-title">リンクの編集</h3>
+      <h3 id="link-modal-title" data-i18n="links.modal.title">リンクの編集</h3>
       <input type="hidden" id="link-page-id" />
       <div class="form-group">
-        <label>名称 <span style="color:var(--danger)">*</span></label>
+        <label data-i18n="links.modal.name">名称 <span style="color:var(--danger)">*</span></label>
         <input type="text" id="link-f-name" placeholder="例: HACCP管理アプリ (GAS)" />
       </div>
       <div class="form-group">
-        <label>分類</label>
+        <label data-i18n="links.modal.category">分類</label>
         <select id="link-f-category">
           <option value="">─ 選択 ─</option>
           <option>アプリ</option>
@@ -570,20 +590,20 @@
         </select>
       </div>
       <div class="form-group">
-        <label>URL</label>
+        <label data-i18n="links.modal.url">URL</label>
         <input type="url" id="link-f-url" placeholder="https://..." />
       </div>
       <div class="form-group">
-        <label>説明</label>
+        <label data-i18n="links.modal.desc">説明</label>
         <textarea id="link-f-desc" rows="2" placeholder="このリンクの用途・内容を記入"></textarea>
       </div>
       <div class="form-group">
-        <label><input type="checkbox" id="link-f-favorite" style="width:auto;margin-right:6px" />よく使う</label>
+        <label><input type="checkbox" id="link-f-favorite" style="width:auto;margin-right:6px" /><span data-i18n="links.modal.favorite">よく使う</span></label>
       </div>
       <div id="link-modal-msg" style="min-height:24px;font-size:0.82rem"></div>
       <div class="modal-footer">
-        <button class="btn btn-outline btn-sm" onclick="closeLinkModal()">キャンセル</button>
-        <button class="btn btn-primary btn-sm" onclick="saveLinkItem()">💾 保存</button>
+        <button class="btn btn-outline btn-sm" onclick="closeLinkModal()" data-i18n="common.cancel">キャンセル</button>
+        <button class="btn btn-primary btn-sm" onclick="saveLinkItem()" data-i18n="common.save">💾 保存</button>
       </div>
     </div>
   </div>
@@ -594,30 +614,30 @@
 <div id="tab-settings" class="tab-pane">
 
   <div class="card">
-    <h2>⚙️ GAS デプロイ URL 管理</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:12px">
+    <h2 data-i18n="settings.gas.title">⚙️ GAS デプロイ URL 管理</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:12px" data-i18n="settings.gas.desc">
       GASを再デプロイしてURLが変わった場合、ここで新しいURLを登録してください。<br>
       登録したURLはブラウザに保存され、次回以降の接続先として使用されます。
     </p>
 
     <div class="settings-group">
-      <label>現在の接続URL（サーバー注入値）</label>
+      <label data-i18n="settings.gas.current">現在の接続URL（サーバー注入値）</label>
       <div class="url-current" id="current-server-url">読み込み中...</div>
     </div>
 
     <div class="settings-group" id="override-section" style="display:none">
-      <label style="color:var(--warning)">⚠️ ブラウザ保存のURL（こちらが優先されます）</label>
+      <label style="color:var(--warning)" data-i18n="settings.gas.override.label">⚠️ ブラウザ保存のURL（こちらが優先されます）</label>
       <div class="url-current" id="current-override-url"></div>
-      <button class="btn btn-danger btn-sm" onclick="clearUrlOverride()">🗑 ブラウザ保存URLを削除して元に戻す</button>
+      <button class="btn btn-danger btn-sm" onclick="clearUrlOverride()" data-i18n="settings.gas.override.clear">🗑 ブラウザ保存URLを削除して元に戻す</button>
     </div>
 
     <div class="settings-group">
-      <label>新しいGAS デプロイ URL を登録</label>
+      <label data-i18n="settings.gas.new">新しいGAS デプロイ URL を登録</label>
       <div class="form-row" style="flex-direction:column;align-items:stretch">
         <input type="url" id="new-gas-url" placeholder="https://script.google.com/macros/s/...../exec" style="width:100%" />
         <div style="display:flex;gap:8px;margin-top:6px">
-          <button class="btn btn-primary btn-sm" onclick="testAndSaveUrl()">🔗 テストして保存</button>
-          <button class="btn btn-outline btn-sm" onclick="saveUrlOnly()">💾 テストせず保存</button>
+          <button class="btn btn-primary btn-sm" onclick="testAndSaveUrl()" data-i18n="settings.gas.testAndSave">🔗 テストして保存</button>
+          <button class="btn btn-outline btn-sm" onclick="saveUrlOnly()" data-i18n="settings.gas.saveOnly">💾 テストせず保存</button>
         </div>
       </div>
       <div id="url-test-result" style="margin-top:8px"></div>
@@ -625,19 +645,19 @@
   </div>
 
   <div class="card">
-    <h2>🗄️ 接続 DB 設定</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="settings.db.title">🗄️ 接続 DB 設定</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="settings.db.desc">
       GAS スクリプトプロパティで設定された DB 接続情報（カスタム設定 / デフォルト）を表示します。
     </p>
-    <button class="btn btn-outline btn-sm" onclick="loadConfig()">🔄 設定を読み込む</button>
+    <button class="btn btn-outline btn-sm" onclick="loadConfig()" data-i18n="settings.db.button">🔄 設定を読み込む</button>
     <div id="config-result" style="margin-top:12px">
-      <p style="color:var(--muted)">「設定を読み込む」を押してください。</p>
+      <p style="color:var(--muted)" data-i18n="settings.db.hint">「設定を読み込む」を押してください。</p>
     </div>
   </div>
 
   <div class="card">
-    <h2>📖 DB 設定の変更方法</h2>
-    <p style="font-size:0.83rem;line-height:1.6">
+    <h2 data-i18n="settings.howto.title">📖 DB 設定の変更方法</h2>
+    <p style="font-size:0.83rem;line-height:1.6" data-i18n="settings.howto.desc">
       接続するNotionDBを変更するには、GASのスクリプトプロパティを編集します:<br><br>
       <strong>① </strong><a href="https://script.google.com" target="_blank">script.google.com</a> を開く →「千石蔵HACCP管理システムv5」を選択<br>
       <strong>② </strong>左側 ⚙️「プロジェクトの設定」→「スクリプトプロパティ」<br>
@@ -650,13 +670,13 @@
   { "id": "2b5f5289a51c8094992ce73a9c59f756", "label": "水質検査",       "dateField": "実施日 Test date" },
   { "id": "90807944c8dc481da413792f96a5b074", "label": "CIP・ATP",       "dateField": "日付" }
 ]</pre>
-    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px">
+    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px" data-i18n="settings.howto.note1">
       ※ <code>dateField: "_title_date"</code> は、タイトルに手入力されている「YYYY/MM/DD氏名」形式の日付で検索します。
       体調管理DBは「作成日時」が入力タイミングのズレ（日付をまたいで入力・後日まとめて入力等）で記録対象日と一致しないことがあるため、
       created_time ではなくタイトルの日付を使用します。
     </p>
-    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px">※ スクリプトプロパティ変更後、再デプロイは不要です。即時反映されます。</p>
-    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px">
+    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px" data-i18n="settings.howto.note2">※ スクリプトプロパティ変更後、再デプロイは不要です。即時反映されます。</p>
+    <p style="font-size:0.8rem;color:var(--muted);margin-top:8px" data-i18n="settings.howto.note3">
       ※ 静的書類保管庫（書類本体スプレッドシート）を変更する場合は <code>DOCUMENTS_SPREADSHEET_ID</code> を設定してください。
     </p>
   </div>
@@ -667,46 +687,64 @@
 <div id="tab-debug" class="tab-pane">
 
   <div class="card">
-    <h2>🐛 デバッグツール</h2>
+    <h2 data-i18n="debug.title">🐛 デバッグツール</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-      <button class="btn btn-outline btn-sm" onclick="runConnectionCheck('debug-result')">🔗 Notion 接続確認</button>
-      <button class="btn btn-outline btn-sm" onclick="loadLogs()">📋 ログを見る</button>
-      <button class="btn btn-outline btn-sm" onclick="loadFilteredLogs('ERROR')">🔴 ERROR のみ</button>
-      <button class="btn btn-outline btn-sm" onclick="loadFilteredLogs('WARN')">🟡 WARN 以上</button>
-      <button class="btn btn-danger btn-sm" onclick="clearEl('debug-result')">🗑 クリア</button>
+      <button class="btn btn-outline btn-sm" onclick="runConnectionCheck('debug-result')" data-i18n="debug.button.connection">🔗 Notion 接続確認</button>
+      <button class="btn btn-outline btn-sm" onclick="loadLogs()" data-i18n="debug.button.logs">📋 ログを見る</button>
+      <button class="btn btn-outline btn-sm" onclick="loadFilteredLogs('ERROR')" data-i18n="debug.button.errorOnly">🔴 ERROR のみ</button>
+      <button class="btn btn-outline btn-sm" onclick="loadFilteredLogs('WARN')" data-i18n="debug.button.warnPlus">🟡 WARN 以上</button>
+      <button class="btn btn-danger btn-sm" onclick="clearEl('debug-result')" data-i18n="debug.button.clear">🗑 クリア</button>
     </div>
     <div id="debug-result"></div>
   </div>
 
   <div class="card">
-    <h2>⚡ API 直接テスト</h2>
-    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">
+    <h2 data-i18n="debug.apiTest.title">⚡ API 直接テスト</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px" data-i18n="debug.apiTest.desc">
       任意の Notion DB ID に対してクエリを実行します。
     </p>
     <div class="form-row">
       <input type="text" id="test-dbid" placeholder="Notion DB ID を入力" style="flex:1;min-width:220px" />
-      <button class="btn btn-primary btn-sm" onclick="testQueryDb()">▶ 実行</button>
+      <button class="btn btn-primary btn-sm" onclick="testQueryDb()" data-i18n="debug.apiTest.button">▶ 実行</button>
     </div>
     <div id="test-result"></div>
   </div>
 
   <div class="card">
-    <h2>📊 API レスポンス計測</h2>
-    <button class="btn btn-outline btn-sm" onclick="measureApiResponseTime()">⏱ レスポンスタイム計測</button>
+    <h2 data-i18n="debug.perf.title">📊 API レスポンス計測</h2>
+    <button class="btn btn-outline btn-sm" onclick="measureApiResponseTime()" data-i18n="debug.perf.button">⏱ レスポンスタイム計測</button>
     <div id="perf-result" style="margin-top:10px"></div>
   </div>
 
   <div class="card">
-    <h2>📖 トラブルシューティング</h2>
+    <h2 data-i18n="debug.trouble.title">📖 トラブルシューティング</h2>
     <table>
-      <tr><th>症状</th><th>原因</th><th>対処</th></tr>
-      <tr><td>接続確認 ERROR</td><td>トークン未設定 / 期限切れ</td><td>GAS スクリプトプロパティを確認</td></tr>
-      <tr><td>DB が WARN</td><td>インテグレーション未共有</td><td>Notion DB → 接続を追加</td></tr>
-      <tr><td>書類が表示されない</td><td>ステータスが Active でない</td><td>書類マスターDB の「ステータス」を確認</td></tr>
-      <tr><td>日々の記録が 0 件</td><td>体調管理は作成日時で検索</td><td>当日入力した記録があるか Notion で確認</td></tr>
-      <tr><td>水質検査が 0 件</td><td>「実施日 Test date」フィールド</td><td>DB に「実施日 Test date」プロパティがあるか確認</td></tr>
-      <tr><td>ログが記録されない</td><td>Sheet ID 未設定</td><td>DEBUG_LOG_SHEET_ID を設定</td></tr>
-      <tr><td>書類本体一覧が読み込めない</td><td>DOCUMENTS_SPREADSHEET_ID 未設定/権限なし</td><td>スクリプトプロパティ確認・シートへの編集者権限確認</td></tr>
+      <tr>
+        <th data-i18n="debug.trouble.header.symptom">症状</th>
+        <th data-i18n="debug.trouble.header.cause">原因</th>
+        <th data-i18n="debug.trouble.header.action">対処</th>
+      </tr>
+      <tr>
+        <td>接続確認 ERROR</td><td>トークン未設定 / 期限切れ</td><td>GAS スクリプトプロパティを確認</td>
+      </tr>
+      <tr>
+        <td>DB が WARN</td><td>インテグレーション未共有</td><td>Notion DB → 接続を追加</td>
+      </tr>
+      <tr>
+        <td>書類が表示されない</td><td>ステータスが Active でない</td><td>書類マスターDB の「ステータス」を確認</td>
+      </tr>
+      <tr>
+        <td>日々の記録が 0 件</td><td>体調管理は作成日時で検索</td><td>当日入力した記録があるか Notion で確認</td>
+      </tr>
+      <tr>
+        <td>水質検査が 0 件</td><td>「実施日 Test date」フィールド</td><td>DB に「実施日 Test date」プロパティがあるか確認</td>
+      </tr>
+      <tr>
+        <td>ログが記録されない</td><td>Sheet ID 未設定</td><td>DEBUG_LOG_SHEET_ID を設定</td>
+      </tr>
+      <tr>
+        <td>書類本体一覧が読み込めない</td><td>DOCUMENTS_SPREADSHEET_ID 未設定/権限なし</td><td>スクリプトプロパティ確認・シートへの編集者権限確認</td>
+      </tr>
     </table>
   </div>
 
@@ -718,6 +756,208 @@
 const INJECTED_API_BASE = '<?= API_BASE ?>';
 const GAS_URL_STORAGE_KEY = 'sengokura_gas_url_override';
 const THEME_STORAGE_KEY = 'sengokura_theme';
+const LANG_STORAGE_KEY = 'sengokura_lang';
+
+// ─── i18n 翻訳辞書 ───
+const I18N_DICT = {
+  'app.title': {
+    ja: '🍺 千石蔵ビアホール　HACCP管理システム',
+    en: '🍺 Sengokura Beer Hall HACCP Management System'
+  },
+  'tab.dashboard': { ja: '📊 ダッシュボード', en: '📊 Dashboard' },
+  'tab.documents': { ja: '📚 書類', en: '📚 Documents' },
+  'tab.daily': { ja: '📋 日々の記録', en: '📋 Daily Records' },
+  'tab.water': { ja: '💧 水質検査', en: '💧 Water Quality' },
+  'tab.cip': { ja: '🧼 ATP/CIP', en: '🧼 ATP/CIP' },
+  'tab.search': { ja: '🔍 検索', en: '🔍 Search' },
+  'tab.haccp': { ja: '🎯 HACCP管理項目', en: '🎯 HACCP Items' },
+  'tab.links': { ja: '🔗 リンク集', en: '🔗 Links' },
+  'tab.settings': { ja: '⚙️ 設定', en: '⚙️ Settings' },
+  'tab.debug': { ja: '🐛 デバッグ', en: '🐛 Debug' },
+
+  'dashboard.connection.title': { ja: '🔗 システム接続状態', en: '🔗 System Connection Status' },
+  'dashboard.connection.desc': { ja: 'Notion 接続・各 DB のアクセス権を診断します。', en: 'Diagnose Notion connection and DB access permissions.' },
+  'dashboard.connection.button': { ja: '接続確認を実行', en: 'Run Connection Check' },
+
+  'dashboard.today.title': { ja: '📅 本日の記録サマリー', en: '📅 Today\'s Record Summary' },
+  'dashboard.today.desc1': { ja: '本日（', en: 'Today (' },
+  'dashboard.today.desc2': { ja: '）の各 DB 記録件数を集計します。', en: ') - aggregate record counts for each DB.' },
+  'dashboard.today.button': { ja: '📥 本日の記録を読み込む', en: '📥 Load Today\'s Records' },
+
+  'documents.master.title': { ja: '📚 HACCP必須書類マスター（Notion）', en: '📚 HACCP Required Documents Master (Notion)' },
+  'documents.master.desc': { ja: '書類マスター DB（ステータス: Active）を自動読み込みします。', en: 'Automatically loads Document Master DB (Status: Active).' },
+  'documents.master.button': { ja: '🔄 書類を読み込む', en: '🔄 Load Documents' },
+  'documents.master.hint': { ja: '「書類を読み込む」を押してください。', en: 'Click "Load Documents".' },
+
+  'documents.static.title': { ja: '📁 静的書類保管庫（スプレッドシート）', en: '📁 Static Document Storage (Spreadsheet)' },
+  'documents.static.desc': {
+    ja: 'HACCP書類16点の本体（組織図・危害要因分析表・CCP決定表など）はスプレッドシートの各シートタブに格納されています。文書番号で Notion 側書類マスターと相互参照できます。',
+    en: 'The main bodies of 16 HACCP documents (organization chart, hazard analysis sheet, CCP decision sheet, etc.) are stored in spreadsheet tabs. Cross-reference with Notion Document Master by document number.'
+  },
+  'documents.static.button': { ja: '🔄 書類本体一覧を読み込む', en: '🔄 Load Document Body List' },
+  'documents.static.hint': { ja: '「書類本体一覧を読み込む」を押してください。', en: 'Click "Load Document Body List".' },
+
+  'daily.title': { ja: '📋 日々の記録', en: '📋 Daily Records' },
+  'daily.desc': { ja: '体調管理・開店前チェック・締め作業の記録を日付で確認します。', en: 'Check health, opening checks, and closing task records by date.' },
+  'daily.button': { ja: '📋 記録を読み込む', en: '📋 Load Records' },
+
+  'water.title': { ja: '💧 水質検査記録', en: '💧 Water Quality Records' },
+  'water.desc': { ja: '水質検査DB（実施日 Test date フィールド）から記録を取得します。日付を空欄にすると最新100件を表示します。', en: 'Fetch records from Water Quality DB (Test date field). Leave date blank to show latest 100 records.' },
+  'water.button.search': { ja: '💧 検索', en: '💧 Search' },
+  'water.button.latest': { ja: '最新100件', en: 'Latest 100' },
+  'water.hint': { ja: '日付を選択するか「最新100件」を押してください。', en: 'Select a date or click "Latest 100".' },
+
+  'cip.title': { ja: '🧼 CIP・ATP 洗浄管理記録', en: '🧼 CIP & ATP Cleaning Records' },
+  'cip.desc': { ja: 'CIP・ATP 洗浄管理 DB から記録を取得します。日付を空欄にすると最新100件を表示します。', en: 'Fetch records from CIP & ATP Cleaning DB. Leave date blank to show latest 100 records.' },
+  'cip.button.search': { ja: '🧼 検索', en: '🧼 Search' },
+  'cip.button.latest': { ja: '最新100件', en: 'Latest 100' },
+  'cip.hint': { ja: '日付を選択するか「最新100件」を押してください。', en: 'Select a date or click "Latest 100".' },
+
+  'search.title': { ja: '🔍 日付横断検索', en: '🔍 Cross-Date Search' },
+  'search.desc': { ja: '登録された全 DB を指定日付で横断検索し、タイムライン形式で表示します。', en: 'Cross-search all registered DBs for a specified date and display as timeline.' },
+  'search.button': { ja: '🔍 検索', en: '🔍 Search' },
+
+  'haccp.title': { ja: '🎯 HACCP管理項目マスター', en: '🎯 HACCP Item Master' },
+  'haccp.desc': { ja: '12項目のHACCP管理要求事項を管理します。大分類・説明・担当DB・優先度などを編集できます。', en: 'Manage 12 HACCP requirement items. Edit categories, descriptions, responsible DBs, priorities, etc.' },
+  'haccp.button.reload': { ja: '🔄 一覧を読み込む', en: '🔄 Load List' },
+  'haccp.button.add': { ja: '➕ 新規項目を追加', en: '➕ Add New Item' },
+  'haccp.hint': { ja: '「一覧を読み込む」を押してください。', en: 'Click "Load List".' },
+
+  'haccp.modal.title': { ja: 'HACCP管理項目の編集', en: 'Edit HACCP Item' },
+  'haccp.modal.name': { ja: '項目名', en: 'Item Name' },
+  'haccp.modal.category': { ja: '大分類', en: 'Category' },
+  'haccp.modal.desc': { ja: '説明', en: 'Description' },
+  'haccp.modal.db': { ja: '担当DB', en: 'Responsible DB' },
+  'haccp.modal.dblink': { ja: '担当DBリンク (URL)', en: 'DB Link (URL)' },
+  'haccp.modal.freq': { ja: '記録頻度', en: 'Recording Frequency' },
+  'haccp.modal.priority': { ja: '優先度', en: 'Priority' },
+  'haccp.modal.status': { ja: 'ステータス', en: 'Status' },
+  'haccp.modal.order': { ja: '順番（数値）', en: 'Order (Number)' },
+
+  'links.title': { ja: '🔗 アプリ・DBリンク集', en: '🔗 App & DB Links' },
+  'links.desc': { ja: 'GASアプリ・各NotionDBへのリンクを管理します。GASのデプロイURLはここで登録してください。', en: 'Manage links to GAS app and Notion DBs. Register GAS deployment URL here.' },
+  'links.button.reload': { ja: '🔄 一覧を読み込む', en: '🔄 Load List' },
+  'links.button.add': { ja: '➕ 新規リンクを追加', en: '➕ Add New Link' },
+  'links.hint': { ja: '「一覧を読み込む」を押してください。', en: 'Click "Load List".' },
+
+  'links.modal.title': { ja: 'リンクの編集', en: 'Edit Link' },
+  'links.modal.name': { ja: '名称', en: 'Name' },
+  'links.modal.category': { ja: '分類', en: 'Category' },
+  'links.modal.url': { ja: 'URL', en: 'URL' },
+  'links.modal.desc': { ja: '説明', en: 'Description' },
+  'links.modal.favorite': { ja: 'よく使う', en: 'Favorite' },
+
+  'settings.gas.title': { ja: '⚙️ GAS デプロイ URL 管理', en: '⚙️ GAS Deployment URL Management' },
+  'settings.gas.desc': {
+    ja: 'GASを再デプロイしてURLが変わった場合、ここで新しいURLを登録してください。<br>登録したURLはブラウザに保存され、次回以降の接続先として使用されます。',
+    en: 'If GAS URL changes after re-deployment, register the new URL here.<br>The registered URL is saved in browser and used for future connections.'
+  },
+  'settings.gas.current': { ja: '現在の接続URL（サーバー注入値）', en: 'Current Connection URL (Server-injected)' },
+  'settings.gas.override.label': { ja: '⚠️ ブラウザ保存のURL（こちらが優先されます）', en: '⚠️ Browser-saved URL (takes precedence)' },
+  'settings.gas.override.clear': { ja: '🗑 ブラウザ保存URLを削除して元に戻す', en: '🗑 Remove browser-saved URL and revert' },
+  'settings.gas.new': { ja: '新しいGAS デプロイ URL を登録', en: 'Register New GAS Deployment URL' },
+  'settings.gas.testAndSave': { ja: '🔗 テストして保存', en: '🔗 Test & Save' },
+  'settings.gas.saveOnly': { ja: '💾 テストせず保存', en: '💾 Save without Test' },
+
+  'settings.db.title': { ja: '🗄️ 接続 DB 設定', en: '🗄️ Connected DB Settings' },
+  'settings.db.desc': { ja: 'GAS スクリプトプロパティで設定された DB 接続情報（カスタム設定 / デフォルト）を表示します。', en: 'Shows DB connection info configured in GAS script properties (custom/default).' },
+  'settings.db.button': { ja: '🔄 設定を読み込む', en: '🔄 Load Settings' },
+  'settings.db.hint': { ja: '「設定を読み込む」を押してください。', en: 'Click "Load Settings".' },
+
+  'settings.howto.title': { ja: '📖 DB 設定の変更方法', en: '📖 How to Change DB Settings' },
+  'settings.howto.desc': {
+    ja: '接続するNotionDBを変更するには、GASのスクリプトプロパティを編集します:<br><br><strong>① </strong><a href="https://script.google.com" target="_blank">script.google.com</a> を開く →「千石蔵HACCP管理システムv5」を選択<br><strong>② </strong>左側 ⚙️「プロジェクトの設定」→「スクリプトプロパティ」<br><strong>③ </strong><code>EXISTING_DBS</code> を編集:',
+    en: 'To change connected Notion DBs, edit GAS script properties:<br><br><strong>1) </strong>Open <a href="https://script.google.com" target="_blank">script.google.com</a> and select "Sengokura HACCP Management System v5"<br><strong>2) </strong>Click ⚙️ "Project Settings" → "Script Properties" on the left<br><strong>3) </strong>Edit <code>EXISTING_DBS</code>:'
+  },
+  'settings.howto.note1': {
+    ja: '※ <code>dateField: "_title_date"</code> は、タイトルに手入力されている「YYYY/MM/DD氏名」形式の日付で検索します。体調管理DBは「作成日時」が入力タイミングのズレ（日付をまたいで入力・後日まとめて入力等）で記録対象日と一致しないことがあるため、created_time ではなくタイトルの日付を使用します。',
+    en: '* <code>dateField: "_title_date"</code> searches by date manually entered in title as "YYYY/MM/DD name" format. For health DB, created_time may differ from target date due to late/cross-day input, so title date is used instead.'
+  },
+  'settings.howto.note2': { ja: '※ スクリプトプロパティ変更後、再デプロイは不要です。即時反映されます。', en: '* No re-deployment required after changing script properties. Changes apply immediately.' },
+  'settings.howto.note3': { ja: '※ 静的書類保管庫（書類本体スプレッドシート）を変更する場合は <code>DOCUMENTS_SPREADSHEET_ID</code> を設定してください。', en: '* To change static document storage spreadsheet, configure <code>DOCUMENTS_SPREADSHEET_ID</code>.' },
+
+  'debug.title': { ja: '🐛 デバッグツール', en: '🐛 Debug Tools' },
+  'debug.button.connection': { ja: '🔗 Notion 接続確認', en: '🔗 Check Notion Connection' },
+  'debug.button.logs': { ja: '📋 ログを見る', en: '📋 View Logs' },
+  'debug.button.errorOnly': { ja: '🔴 ERROR のみ', en: '🔴 ERROR only' },
+  'debug.button.warnPlus': { ja: '🟡 WARN 以上', en: '🟡 WARN and above' },
+  'debug.button.clear': { ja: '🗑 クリア', en: '🗑 Clear' },
+
+  'debug.apiTest.title': { ja: '⚡ API 直接テスト', en: '⚡ Direct API Test' },
+  'debug.apiTest.desc': { ja: '任意の Notion DB ID に対してクエリを実行します。', en: 'Run query against any Notion DB ID.' },
+  'debug.apiTest.button': { ja: '▶ 実行', en: '▶ Run' },
+
+  'debug.perf.title': { ja: '📊 API レスポンス計測', en: '📊 API Response Measurement' },
+  'debug.perf.button': { ja: '⏱ レスポンスタイム計測', en: '⏱ Measure Response Times' },
+
+  'debug.trouble.title': { ja: '📖 トラブルシューティング', en: '📖 Troubleshooting' },
+  'debug.trouble.header.symptom': { ja: '症状', en: 'Symptom' },
+  'debug.trouble.header.cause': { ja: '原因', en: 'Cause' },
+  'debug.trouble.header.action': { ja: '対処', en: 'Action' },
+
+  'common.cancel': { ja: 'キャンセル', en: 'Cancel' },
+  'common.save': { ja: '💾 保存', en: '💾 Save' },
+  'common.loading': { ja: '読み込み中...', en: 'Loading...' },
+  'common.cleared': { ja: 'クリアしました。', en: 'Cleared.' },
+  'common.errorPrefix': { ja: 'エラー: ', en: 'Error: ' },
+  'common.noDateAlert': { ja: '日付を選択してください', en: 'Please select a date.' },
+  'common.urlRequired': { ja: 'URLを入力してください', en: 'Please enter a URL.' },
+  'common.urlInvalidGAS': { ja: 'GASのURLは https://script.google.com/ から始まる必要があります', en: 'GAS URL must start with https://script.google.com/' },
+
+  'table.dbName': { ja: 'DB名', en: 'DB Name' },
+  'table.count': { ja: '件数', en: 'Count' },
+  'table.status': { ja: '状態', en: 'Status' },
+  'table.title': { ja: 'タイトル', en: 'Title' },
+  'table.created': { ja: '作成日時', en: 'Created' },
+  'table.link': { ja: 'リンク', en: 'Link' }
+};
+
+// ─── 現在の言語 ───
+let CURRENT_LANG = 'ja';
+
+// ─── i18n ヘルパー関数 ───
+function t(key) {
+  const entry = I18N_DICT[key];
+  if (!entry) return key;
+  return entry[CURRENT_LANG] || entry.ja || key;
+}
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key && I18N_DICT[key]) {
+      const text = t(key);
+      // HTMLが含まれている可能性があるため innerHTML を使用
+      el.innerHTML = text;
+    }
+  });
+  
+  // 言語表示の更新
+  const langDisplay = document.getElementById('lang-display');
+  if (langDisplay) {
+    langDisplay.textContent = CURRENT_LANG === 'ja' ? 'JP' : 'EN';
+  }
+}
+
+// ─── 言語切替 ───
+function toggleLanguage() {
+  CURRENT_LANG = CURRENT_LANG === 'ja' ? 'en' : 'ja';
+  localStorage.setItem(LANG_STORAGE_KEY, CURRENT_LANG);
+  document.documentElement.setAttribute('lang', CURRENT_LANG);
+  applyI18n();
+}
+
+function initLanguage() {
+  const saved = localStorage.getItem(LANG_STORAGE_KEY);
+  if (saved === 'en' || saved === 'ja') {
+    CURRENT_LANG = saved;
+  } else {
+    // ブラウザ言語設定から推定
+    const navLang = (navigator.language || navigator.userLanguage || 'ja').toLowerCase();
+    CURRENT_LANG = navLang.startsWith('en') ? 'en' : 'ja';
+  }
+  document.documentElement.setAttribute('lang', CURRENT_LANG);
+}
 
 // ─── ダークモード ───
 function applyTheme(theme) {
@@ -725,17 +965,19 @@ function applyTheme(theme) {
   const btn = document.getElementById('theme-toggle-btn');
   if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
+
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   const next = current === 'dark' ? 'light' : 'dark';
   localStorage.setItem(THEME_STORAGE_KEY, next);
   applyTheme(next);
 }
-(function initTheme() {
+
+function initTheme() {
   const saved = localStorage.getItem(THEME_STORAGE_KEY);
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   applyTheme(saved || (prefersDark ? 'dark' : 'light'));
-})();
+}
 
 /** ブラウザ保存のURL上書きがあればそちらを使う */
 function getApiBase() {
@@ -763,8 +1005,14 @@ function setHtml(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
 }
-function clearEl(id) { setHtml(id, '<p style="color:var(--muted)">クリアしました。</p>'); }
-function loading(id)  { setHtml(id, '<div class="loading"><span class="spinner"></span>読み込み中...</div>'); }
+
+function clearEl(id) { 
+  setHtml(id, `<p style="color:var(--muted)">${t('common.cleared')}</p>`); 
+}
+
+function loading(id) { 
+  setHtml(id, `<div class="loading"><span class="spinner"></span>${t('common.loading')}</div>`); 
+}
 
 function statusBadge(s) {
   if (s === 'OK')   return '<span class="badge-ok">✅ OK</span>';
@@ -784,6 +1032,11 @@ function fmtDate(iso) {
 
 // ─── 初期化 ───
 function initApp() {
+  // テーマと言語の初期化
+  initTheme();
+  initLanguage();
+  applyI18n();
+
   // 今日の日付をセット
   const today = todayStr();
   document.getElementById('today-label').textContent =
@@ -811,7 +1064,7 @@ async function runConnectionCheck(targetId) {
     const data = await api({ action: 'debugNotionConnection' });
     const ms   = Date.now() - t0;
     let html = `<p style="color:var(--muted);font-size:0.75rem;margin-bottom:8px">レスポンスタイム: ${ms}ms</p>
-      <table><tr><th>項目</th><th>ステータス</th><th>詳細</th></tr>`;
+      <table><tr><th>項目</th><th>${t('table.status')}</th><th>詳細</th></tr>`;
     (data.checks || []).forEach(c => {
       html += `<tr><td>${c.name}</td><td>${statusBadge(c.status)}</td>
                <td style="font-size:0.78rem;color:var(--muted)">${c.message}</td></tr>`;
@@ -819,7 +1072,7 @@ async function runConnectionCheck(targetId) {
     html += '</table>';
     setHtml(targetId, html);
   } catch (e) {
-    setHtml(targetId, `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml(targetId, `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -827,7 +1080,7 @@ async function loadTodaySummary() {
   loading('today-summary');
   try {
     const data = await api({ action: 'searchByDate', date: todayStr() });
-    let html = '<table><tr><th>DB名</th><th>件数</th><th>状態</th></tr>';
+    let html = `<table><tr><th>${t('table.dbName')}</th><th>${t('table.count')}</th><th>${t('table.status')}</th></tr>`;
     (data.results || []).forEach(r => {
       html += `<tr><td>${r.dbLabel}</td><td><strong>${r.recordCount ?? 0}</strong> 件</td>
                <td>${r.error ? statusBadge('ERROR') : statusBadge('OK')}</td></tr>`;
@@ -835,7 +1088,7 @@ async function loadTodaySummary() {
     html += '</table>';
     setHtml('today-summary', html);
   } catch (e) {
-    setHtml('today-summary', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('today-summary', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -847,7 +1100,10 @@ async function loadDocuments() {
   loading('doc-result');
   try {
     const data = await api({ action: 'getDocuments' });
-    if (!data.ok) { setHtml('doc-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('doc-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     const docs = data.documents || [];
     if (!docs.length) {
@@ -874,7 +1130,7 @@ async function loadDocuments() {
     html += '</table>';
     setHtml('doc-result', html);
   } catch (e) {
-    setHtml('doc-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('doc-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -883,7 +1139,10 @@ async function loadDocumentMaster() {
   loading('doc-master-result');
   try {
     const data = await api({ action: 'getDocumentMaster' });
-    if (!data.ok) { setHtml('doc-master-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('doc-master-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     const docs = data.documents || [];
     if (!docs.length) {
@@ -910,7 +1169,7 @@ async function loadDocumentMaster() {
     html += '</table></div>';
     setHtml('doc-master-result', html);
   } catch (e) {
-    setHtml('doc-master-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('doc-master-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -920,11 +1179,17 @@ async function loadDocumentMaster() {
 
 async function loadDailyRecords() {
   const date = document.getElementById('daily-date').value;
-  if (!date) { alert('日付を選択してください'); return; }
+  if (!date) { 
+    alert(t('common.noDateAlert')); 
+    return; 
+  }
   loading('daily-result');
   try {
     const data = await api({ action: 'getDailyRecords', date });
-    if (!data.ok) { setHtml('daily-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('daily-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">
       📅 ${date} の記録
@@ -968,7 +1233,7 @@ async function loadDailyRecords() {
 
     setHtml('daily-result', html);
   } catch (e) {
-    setHtml('daily-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('daily-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -993,7 +1258,7 @@ function renderCheckSection(title, section) {
   } else if (!section.records || !section.records.length) {
     html += '<p style="color:var(--muted);font-size:0.82rem">記録なし</p>';
   } else {
-    html += '<table><tr><th>タイトル</th><th>作成日時</th><th>リンク</th></tr>';
+    html += `<table><tr><th>${t('table.title')}</th><th>${t('table.created')}</th><th>${t('table.link')}</th></tr>`;
     section.records.forEach(r => {
       html += `<tr>
         <td>${r.title || '(無題)'}</td>
@@ -1018,7 +1283,10 @@ async function loadWaterQuality(allRecords) {
     const params = { action: 'getWaterQuality' };
     if (date) params.date = date;
     const data = await api(params);
-    if (!data.ok) { setHtml('water-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('water-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     const label = date ? `📅 ${date} の検査記録` : '最新100件の検査記録';
     let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px">${label} — ${data.count} 件</p>`;
@@ -1030,7 +1298,7 @@ async function loadWaterQuality(allRecords) {
     }
     setHtml('water-result', html);
   } catch (e) {
-    setHtml('water-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('water-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -1045,7 +1313,10 @@ async function loadCIPATP(allRecords) {
     const params = { action: 'getCIPATP' };
     if (date) params.date = date;
     const data = await api(params);
-    if (!data.ok) { setHtml('cip-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('cip-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     const label = date ? `📅 ${date} の洗浄記録` : '最新100件の洗浄記録';
     let html = `<p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px">${label} — ${data.count} 件</p>`;
@@ -1057,7 +1328,7 @@ async function loadCIPATP(allRecords) {
     }
     setHtml('cip-result', html);
   } catch (e) {
-    setHtml('cip-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('cip-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -1071,9 +1342,9 @@ function renderGenericRecords(records) {
   const keys = [...allKeys].slice(0, 6);
 
   let html = '<div style="overflow-x:auto"><table>';
-  html += '<tr><th>タイトル</th><th>作成日時</th>';
+  html += `<tr><th>${t('table.title')}</th><th>${t('table.created')}</th>`;
   keys.forEach(k => { html += `<th>${k}</th>`; });
-  html += '<th>リンク</th></tr>';
+  html += `<th>${t('table.link')}</th></tr>`;
 
   records.forEach(r => {
     html += `<tr>
@@ -1096,11 +1367,17 @@ function renderGenericRecords(records) {
 
 async function runSearch() {
   const date = document.getElementById('search-date').value;
-  if (!date) { alert('日付を選択してください'); return; }
+  if (!date) { 
+    alert(t('common.noDateAlert')); 
+    return; 
+  }
   loading('search-result');
   try {
     const data = await api({ action: 'searchByDate', date });
-    if (!data.ok) { setHtml('search-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('search-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     let html = `<p style="font-size:0.82rem;color:var(--muted);margin-bottom:12px">検索日: <strong>${date}</strong></p>`;
     (data.results || []).forEach(r => {
@@ -1116,7 +1393,7 @@ async function runSearch() {
       } else if (!r.records || !r.records.length) {
         html += '<p style="color:var(--muted);font-size:0.82rem">記録なし</p>';
       } else {
-        html += '<table><tr><th>タイトル</th><th>作成日時</th><th>リンク</th></tr>';
+        html += `<table><tr><th>${t('table.title')}</th><th>${t('table.created')}</th><th>${t('table.link')}</th></tr>`;
         r.records.forEach(rec => {
           html += `<tr>
             <td>${rec.title || '(無題)'}</td>
@@ -1133,7 +1410,7 @@ async function runSearch() {
     });
     setHtml('search-result', html);
   } catch (e) {
-    setHtml('search-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('search-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -1143,12 +1420,15 @@ async function runSearch() {
 
 async function testAndSaveUrl() {
   const url = document.getElementById('new-gas-url').value.trim();
-  if (!url) { alert('URLを入力してください'); return; }
+  if (!url) { 
+    alert(t('common.urlRequired')); 
+    return; 
+  }
   if (!url.startsWith('https://script.google.com/')) {
-    alert('GASのURLは https://script.google.com/ から始まる必要があります');
+    alert(t('common.urlInvalidGAS'));
     return;
   }
-  setHtml('url-test-result', '<div class="loading"><span class="spinner"></span>テスト中...</div>');
+  setHtml('url-test-result', `<div class="loading"><span class="spinner"></span>テスト中...</div>`);
   try {
     const res = await fetch(url + '?action=getConfig');
     const data = await res.json();
@@ -1167,7 +1447,10 @@ async function testAndSaveUrl() {
 
 function saveUrlOnly() {
   const url = document.getElementById('new-gas-url').value.trim();
-  if (!url) { alert('URLを入力してください'); return; }
+  if (!url) { 
+    alert(t('common.urlRequired')); 
+    return; 
+  }
   localStorage.setItem(GAS_URL_STORAGE_KEY, url);
   setHtml('url-test-result', `<p style="color:var(--success)">💾 URLを保存しました（テストなし）。</p>`);
   document.getElementById('override-section').style.display = '';
@@ -1184,7 +1467,10 @@ async function loadConfig() {
   loading('config-result');
   try {
     const data = await api({ action: 'getConfig' });
-    if (!data.ok) { setHtml('config-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('config-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     let html = `
       <p style="font-size:0.82rem;margin-bottom:10px">
@@ -1204,7 +1490,7 @@ async function loadConfig() {
     });
     setHtml('config-result', html);
   } catch (e) {
-    setHtml('config-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('config-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -1216,13 +1502,19 @@ async function loadLogs(levelFilter) {
   loading('debug-result');
   try {
     const data = await api({ action: 'getLogs', limit: '100' });
-    if (!data.ok) { setHtml('debug-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('debug-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     let logs = data.logs || [];
     if (levelFilter === 'ERROR') logs = logs.filter(l => l.level === 'ERROR');
     if (levelFilter === 'WARN')  logs = logs.filter(l => l.level === 'ERROR' || l.level === 'WARN');
 
-    if (!logs.length) { setHtml('debug-result', '<p style="color:var(--muted)">ログがありません。</p>'); return; }
+    if (!logs.length) { 
+      setHtml('debug-result', '<p style="color:var(--muted)">ログがありません。</p>'); 
+      return; 
+    }
 
     const html = logs.map(l => `
       <div class="log-entry log-${l.level}">
@@ -1235,7 +1527,7 @@ async function loadLogs(levelFilter) {
       </div>`).join('');
     setHtml('debug-result', `<p style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">${logs.length} 件表示</p>` + html);
   } catch (e) {
-    setHtml('debug-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('debug-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -1258,7 +1550,7 @@ async function testQueryDb() {
       : `<p style="color:var(--danger)">❌ エラー: ${data.error} (${ms}ms)</p>`;
     setHtml('test-result', html);
   } catch (e) {
-    setHtml('test-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('test-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -1299,7 +1591,10 @@ async function loadHACCPItems() {
   loading('haccp-result');
   try {
     const data = await api({ action: 'getHACCPItems' });
-    if (!data.ok) { setHtml('haccp-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('haccp-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     _haccpItems = data.items || [];
     if (!_haccpItems.length) {
@@ -1329,7 +1624,7 @@ async function loadHACCPItems() {
     html += '</table></div>';
     setHtml('haccp-result', html);
   } catch (e) {
-    setHtml('haccp-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('haccp-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -1386,20 +1681,20 @@ async function saveHACCPItem() {
     setHtml('haccp-modal-msg', '<span style="color:var(--danger)">項目名は必須です</span>');
     return;
   }
-  setHtml('haccp-modal-msg', '<span style="color:var(--muted)"><span class="spinner"></span>保存中...</span>');
+  setHtml('haccp-modal-msg', `<span style="color:var(--muted)"><span class="spinner"></span>${t('common.loading')}</span>`);
 
   try {
     const action = pageId ? 'updateHACCPItem' : 'createHACCPItem';
     if (pageId) params.pageId = pageId;
     const data = await api({ action, ...params });
     if (!data.ok) {
-      setHtml('haccp-modal-msg', `<span style="color:var(--danger)">エラー: ${data.error}</span>`);
+      setHtml('haccp-modal-msg', `<span style="color:var(--danger)">${t('common.errorPrefix')}${data.error}</span>`);
       return;
     }
     setHtml('haccp-modal-msg', '<span style="color:var(--success)">✅ 保存しました！</span>');
     setTimeout(() => { closeHACCPModal(); loadHACCPItems(); }, 800);
   } catch (e) {
-    setHtml('haccp-modal-msg', `<span style="color:var(--danger)">エラー: ${e.message}</span>`);
+    setHtml('haccp-modal-msg', `<span style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</span>`);
   }
 }
 
@@ -1419,7 +1714,10 @@ async function loadLinks() {
   loading('links-result');
   try {
     const data = await api({ action: 'getLinks' });
-    if (!data.ok) { setHtml('links-result', `<p style="color:var(--danger)">エラー: ${data.error || '不明'}</p>`); return; }
+    if (!data.ok) { 
+      setHtml('links-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${data.error || '不明'}</p>`); 
+      return; 
+    }
 
     _linkItems = data.links || [];
     if (!_linkItems.length) {
@@ -1456,7 +1754,7 @@ async function loadLinks() {
     });
     setHtml('links-result', html);
   } catch (e) {
-    setHtml('links-result', `<p style="color:var(--danger)">エラー: ${e.message}</p>`);
+    setHtml('links-result', `<p style="color:var(--danger)">${t('common.errorPrefix')}${e.message}</p>`);
   }
 }
 
@@ -1497,28 +1795,3 @@ async function saveLinkItem() {
     'よく使う': document.getElementById('link-f-favorite').checked,
   };
   if (!params['名称']) {
-    setHtml('link-modal-msg', '<span style="color:var(--danger)">名称は必須です</span>');
-    return;
-  }
-  setHtml('link-modal-msg', '<span style="color:var(--muted)"><span class="spinner"></span>保存中...</span>');
-
-  try {
-    const action = pageId ? 'updateLink' : 'createLink';
-    if (pageId) params.pageId = pageId;
-    const data = await api({ action, ...params });
-    if (!data.ok) {
-      setHtml('link-modal-msg', `<span style="color:var(--danger)">エラー: ${data.error}</span>`);
-      return;
-    }
-    setHtml('link-modal-msg', '<span style="color:var(--success)">✅ 保存しました！</span>');
-    setTimeout(() => { closeLinkModal(); loadLinks(); }, 800);
-  } catch (e) {
-    setHtml('link-modal-msg', `<span style="color:var(--danger)">エラー: ${e.message}</span>`);
-  }
-}
-
-// ─── 初期化 ───
-window.addEventListener('DOMContentLoaded', initApp);
-</script>
-</body>
-</html>
